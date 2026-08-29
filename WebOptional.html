@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nusantara Journeys - Atlas Interaktif</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <style>
+        /* ================================================================
+           RESET & VARIABEL (sama seperti sebelumnya)
+        ================================================================ */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --primary: #1a6b4a; --primary-dark: #0d4a32; --primary-light: #4a9e7a;
+            --secondary: #3a8db7; --secondary-light: #7ab8d4; --accent-gold: #d4a843;
+            --bg-main: #e8f4ee; --bg-card: #ffffff; --bg-card-hover: #f0faf5;
+            --text-dark: #1a3a2e; --text-muted: #4a6b5e;
+            --shadow: 0 12px 40px rgba(13,74,50,0.12); --radius: 20px;
+            --transition: 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+            --border-glow: 1px solid rgba(26,107,74,0.10);
+            --glass-bg: rgba(255,255,255,0.6); --glass-border: rgba(26,107,74,0.08);
+        }
+        [data-theme="dark"] {
+            --primary: #4a9e7a; --primary-dark: #2d7a5a; --primary-light: #6ab89a;
+            --secondary: #5a9ec7; --secondary-light: #8ac4e0; --accent-gold: #e8c84a;
+            --bg-main: #0f1a18; --bg-card: #1a2e2a; --bg-card-hover: #243e38;
+            --text-dark: #dce8e4; --text-muted: #8aa49a;
+            --shadow: 0 12px 40px rgba(0,0,0,0.4);
+            --glass-bg: rgba(26,46,42,0.7); --glass-border: rgba(74,158,122,0.10);
+        }
+        html { scroll-behavior:smooth; }
+        body {
+            font-family:'Inter',sans-serif; background-color:var(--bg-main); color:var(--text-dark);
+            line-height:1.6; min-height:100vh; transition:background-color 0.4s, color 0.4s;
+            background-image:radial-gradient(ellipse at 20% 30%, rgba(26,107,74,0.06) 0%, transparent 60%),
+                            radial-gradient(ellipse at 80% 70%, rgba(58,141,183,0.05) 0%, transparent 50%);
+        }
+        [data-theme="dark"] body {
+            background-image:radial-gradient(ellipse at 20% 30%, rgba(74,158,122,0.08) 0%, transparent 60%),
+                            radial-gradient(ellipse at 80% 70%, rgba(90,158,199,0.06) 0%, transparent 50%);
+        }
+        ::-webkit-scrollbar { width:8px; }
+        ::-webkit-scrollbar-track { background:var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background:var(--primary); border-radius:20px; border:2px solid var(--bg-main); }
+        ::-webkit-scrollbar-thumb:hover { background:var(--primary-light); }
+        .container { max-width:1400px; margin:0 auto; padding:0 30px; }
+
+        /* ===== PROGRESS BAR ===== */
+        #progressBar { position:fixed; top:0; left:0; width:0%; height:3px; background:linear-gradient(90deg, var(--primary), var(--secondary), var(--accent-gold)); z-index:9999; transition:width 0.1s; box-shadow:0 0 20px rgba(26,107,74,0.2); }
+
+        /* ===== BUTTON ===== */
+        .btn-primary { display:inline-block; background:var(--primary); color:#fff; font-weight:700; padding:12px 32px; border-radius:60px; text-decoration:none; transition:var(--transition); border:none; cursor:pointer; font-size:.95rem; box-shadow:0 6px 24px rgba(26,107,74,0.25); }
+        .btn-primary:hover { background:var(--primary-dark); transform:translateY(-2px) scale(1.02); box-shadow:0 12px 32px rgba(26,107,74,0.35); }
+        .btn-outline { display:inline-block; background:transparent; color:var(--primary); font-weight:600; padding:12px 32px; border-radius:60px; text-decoration:none; border:2px solid var(--primary); transition:var(--transition); font-size:.95rem; cursor:pointer; }
+        .btn-outline:hover { background:var(--primary); color:#fff; transform:translateY(-2px); box-shadow:0 8px 28px rgba(26,107,74,0.2); }
+        .btn-secondary { display:inline-block; background:var(--secondary); color:#fff; font-weight:600; padding:10px 24px; border-radius:60px; text-decoration:none; transition:var(--transition); border:none; cursor:pointer; font-size:.85rem; }
+        .btn-secondary:hover { background:var(--secondary-light); transform:translateY(-2px); }
+        .btn-outline-sm { display:inline-block; background:transparent; color:var(--secondary); font-weight:600; padding:10px 24px; border-radius:60px; text-decoration:none; border:2px solid var(--secondary); transition:var(--transition); font-size:.85rem; cursor:pointer; }
+        .btn-outline-sm:hover { background:var(--secondary); color:#fff; }
+
+        /* ===== NAVBAR ===== */
+        .navbar { padding:16px 0; position:sticky; top:0; z-index:999; backdrop-filter:blur(20px); background:var(--glass-bg); border-bottom:1px solid var(--glass-border); transition:background 0.4s, border-color 0.4s; }
+        .navbar .container { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+        .logo { font-size:1.5rem; font-weight:800; color:var(--text-dark); letter-spacing:-.03em; text-decoration:none; transition:color 0.4s; }
+        .logo i { color:var(--secondary); margin-right:8px; }
+        .logo span { color:var(--primary); }
+        .nav-links { display:flex; gap:28px; list-style:none; font-weight:500; align-items:center; flex-wrap:wrap; }
+        .nav-links a { text-decoration:none; color:var(--text-muted); transition:var(--transition); font-size:.9rem; position:relative; }
+        .nav-links a::after { content:''; position:absolute; bottom:-4px; left:0; width:0%; height:2px; background:var(--secondary); transition:var(--transition); }
+        .nav-links a:hover { color:var(--text-dark); }
+        .nav-links a:hover::after { width:100%; }
+        .nav-cta { background:var(--primary); color:#fff !important; padding:8px 20px; border-radius:40px; font-weight:700; }
+        .nav-cta::after { display:none !important; }
+        .nav-cta:hover { background:var(--primary-dark) !important; color:#fff !important; transform:translateY(-2px); }
+        .theme-toggle { background:var(--bg-card); border:1px solid var(--glass-border); border-radius:40px; padding:6px 12px; cursor:pointer; color:var(--text-muted); font-size:1rem; transition:var(--transition); display:flex; align-items:center; gap:6px; }
+        .theme-toggle:hover { border-color:var(--secondary); color:var(--text-dark); }
+        .theme-toggle i { font-size:1.1rem; }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-layout { display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:40px 0 60px; min-height:calc(100vh - 80px); align-items:start; }
+
+        /* ===== KOLOM KIRI: PETA ===== */
+        .map-column { position:sticky; top:100px; }
+        .map-wrapper { position:relative; width:100%; background:var(--bg-card); border-radius:var(--radius); overflow:hidden; border:2px solid var(--glass-border); box-shadow:var(--shadow); cursor:grab; user-select:none; touch-action:none; aspect-ratio:1/1; transition:background 0.4s, border-color 0.4s; }
+        .map-wrapper:active { cursor:grabbing; }
+        #mapCanvas { display:block; width:100%; height:100%; }
+
+        /* ===== KONTROL ZOOM ===== */
+        .map-controls {
+            position:absolute; bottom:16px; right:16px; display:flex; flex-direction:column; gap:6px; z-index:10;
+        }
+        .map-controls button {
+            width:40px; height:40px; border-radius:50%; border:1px solid var(--glass-border);
+            background:var(--glass-bg); backdrop-filter:blur(8px);
+            color:var(--text-dark); font-size:1.1rem; cursor:pointer; transition:var(--transition);
+            display:flex; align-items:center; justify-content:center;
+            box-shadow:0 2px 12px rgba(0,0,0,0.06);
+        }
+        .map-controls button:hover { background:var(--secondary); color:#fff; border-color:var(--secondary); transform:scale(1.05); }
+        .map-controls button i { pointer-events:none; }
+
+        .drag-hint {
+            position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
+            background:var(--glass-bg); backdrop-filter:blur(8px);
+            padding:6px 18px; border-radius:30px; font-size:.7rem; color:var(--text-muted);
+            border:1px solid var(--glass-border); pointer-events:none; z-index:5;
+            display:flex; align-items:center; gap:8px; opacity:0.8; transition:opacity 0.6s, background 0.4s, color 0.4s;
+            box-shadow:0 4px 16px rgba(0,0,0,0.04);
+        }
+        .drag-hint i { color:var(--secondary); font-size:.8rem; }
+
+        .map-tooltip {
+            position:absolute; background:var(--glass-bg); backdrop-filter:blur(12px);
+            border:1px solid var(--glass-border); border-radius:12px; padding:10px 16px;
+            pointer-events:none; opacity:0; transition:opacity 0.3s, background 0.4s, border-color 0.4s;
+            z-index:20; min-width:130px; box-shadow:var(--shadow);
+        }
+        .map-tooltip.visible { opacity:1; }
+        .map-tooltip h4 { font-size:.9rem; font-weight:700; color:var(--text-dark); margin-bottom:2px; }
+        .map-tooltip p { font-size:.7rem; color:var(--text-muted); margin:0; }
+        .map-tooltip .flag { font-size:1rem; margin-right:6px; }
+
+        /* ===== KOLOM KANAN: KONTEN ===== */
+        .content-column { padding-top:10px; }
+        .content-column .badge-label { display:inline-block; background:rgba(58,141,183,0.10); color:var(--secondary); font-weight:700; font-size:.7rem; text-transform:uppercase; letter-spacing:1.5px; padding:4px 16px; border-radius:40px; margin-bottom:14px; border:1px solid rgba(58,141,183,0.12); transition:background 0.4s, color 0.4s, border-color 0.4s; }
+        .content-column h1 { font-size:3rem; font-weight:800; line-height:1.15; letter-spacing:-.03em; margin-bottom:16px; color:var(--text-dark); transition:color 0.4s; }
+        .content-column h1 span { color:var(--primary); transition:color 0.4s; }
+        .content-column .description { font-size:1.05rem; color:var(--text-muted); max-width:480px; margin-bottom:28px; line-height:1.7; transition:color 0.4s; }
+        .content-column .action-buttons { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:36px; }
+        .content-stats { display:flex; gap:40px; padding-top:28px; border-top:1px solid var(--glass-border); transition:border-color 0.4s; }
+        .content-stats .stat h3 { font-size:1.8rem; font-weight:800; color:var(--primary); transition:color 0.4s; }
+        .content-stats .stat p { font-size:.85rem; color:var(--text-muted); margin:0; transition:color 0.4s; }
+
+        .map-legend { display:flex; gap:16px; margin-top:12px; padding:12px 16px; background:var(--glass-bg); backdrop-filter:blur(4px); border-radius:12px; border:1px solid var(--glass-border); flex-wrap:wrap; transition:background 0.4s, border-color 0.4s; }
+        .map-legend-item { display:flex; align-items:center; gap:8px; font-size:.75rem; color:var(--text-muted); transition:color 0.4s; }
+        .map-legend-item .dot { width:10px; height:10px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.8); box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+        .map-legend-item .dot.gold { background:var(--accent-gold); }
+        .map-legend-item .dot.blue { background:var(--secondary); }
+        .map-legend-item .dot.green { background:var(--primary-light); }
+        .map-legend-item .hint-icon { margin-left:auto; color:var(--text-muted); font-size:.7rem; }
+
+        .featured-spot { margin-top:36px; padding:20px 24px; background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--glass-border); transition:var(--transition), background 0.4s, border-color 0.4s; box-shadow:0 4px 20px rgba(0,0,0,0.02); cursor:pointer; }
+        .featured-spot:hover { background:var(--bg-card-hover); border-color:rgba(26,107,74,0.12); box-shadow:0 8px 28px rgba(26,107,74,0.06); transform:translateY(-2px); }
+        .featured-spot .label { font-size:.7rem; text-transform:uppercase; font-weight:700; letter-spacing:1px; color:var(--secondary); margin-bottom:4px; transition:color 0.4s; }
+        .featured-spot h3 { font-size:1.3rem; font-weight:700; color:var(--text-dark); transition:color 0.4s; }
+        .featured-spot h3 i { color:var(--accent-gold); margin-right:8px; }
+        .featured-spot p { color:var(--text-muted); font-size:.9rem; margin-top:4px; transition:color 0.4s; }
+        .featured-spot .tags { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+        .featured-spot .tags span { background:rgba(58,141,183,0.06); border:1px solid rgba(58,141,183,0.08); padding:2px 12px; border-radius:20px; font-size:.7rem; color:var(--text-muted); transition:background 0.4s, border-color 0.4s, color 0.4s; }
+
+        /* ===== MODAL JELAJAHI ===== */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; animation:fadeIn 0.3s ease; }
+        .modal-overlay.active { display:flex; }
+        @keyframes fadeIn { from{opacity:0; transform:scale(.96)} to{opacity:1; transform:scale(1)} }
+        @keyframes slideUp { from{opacity:0; transform:translateY(30px)} to{opacity:1; transform:translateY(0)} }
+        .modal { background:var(--bg-card); border-radius:var(--radius); max-width:750px; width:100%; max-height:85vh; overflow:hidden; box-shadow:0 24px 80px rgba(0,0,0,0.2); border:1px solid var(--glass-border); transition:background 0.4s, border-color 0.4s; }
+        .modal-header { padding:24px 32px 16px 32px; border-bottom:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; transition:border-color 0.4s; }
+        .modal-header h2 { font-size:1.4rem; font-weight:800; color:var(--text-dark); transition:color 0.4s; }
+        .modal-header h2 i { color:var(--secondary); margin-right:10px; }
+        .modal-header h2 span { color:var(--primary); }
+        .modal-close { width:40px; height:40px; border-radius:50%; border:none; background:var(--bg-main); color:var(--text-muted); font-size:1.2rem; cursor:pointer; transition:var(--transition); display:flex; align-items:center; justify-content:center; }
+        .modal-close:hover { background:rgba(26,107,74,0.08); color:var(--text-dark); transform:rotate(90deg); }
+        .modal-body { padding:20px 32px 32px 32px; overflow-y:auto; max-height:calc(85vh - 80px); }
+        .modal-body .intro { font-size:.95rem; color:var(--text-muted); margin-bottom:16px; line-height:1.6; transition:color 0.4s; }
+
+        .search-filter { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+        .search-filter input { flex:1; min-width:180px; padding:10px 16px; border-radius:40px; border:1px solid var(--glass-border); background:var(--bg-main); color:var(--text-dark); font-size:.9rem; transition:var(--transition), background 0.4s, border-color 0.4s, color 0.4s; outline:none; }
+        .search-filter input:focus { border-color:var(--secondary); box-shadow:0 0 0 3px rgba(58,141,183,0.15); }
+        .search-filter input::placeholder { color:var(--text-muted); }
+        .filter-buttons { display:flex; gap:6px; flex-wrap:wrap; }
+        .filter-btn { padding:6px 16px; border-radius:30px; border:1px solid var(--glass-border); background:transparent; color:var(--text-muted); font-size:.75rem; font-weight:600; cursor:pointer; transition:var(--transition); }
+        .filter-btn:hover { border-color:var(--secondary); color:var(--text-dark); }
+        .filter-btn.active { background:var(--secondary); color:#fff; border-color:var(--secondary); }
+
+        .city-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-height:50vh; overflow-y:auto; padding-right:4px; }
+        .city-grid::-webkit-scrollbar { width:4px; }
+        .city-grid::-webkit-scrollbar-thumb { background:var(--secondary); border-radius:10px; }
+        .city-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--bg-main); border-radius:12px; transition:var(--transition); border:1px solid transparent; cursor:pointer; animation:fadeIn 0.3s ease; }
+        .city-item:hover { background:var(--bg-card-hover); border-color:rgba(26,107,74,0.12); transform:translateX(4px); box-shadow:0 4px 16px rgba(0,0,0,0.04); }
+        .city-item .icon { font-size:1.4rem; width:36px; text-align:center; flex-shrink:0; }
+        .city-item .info { flex:1; min-width:0; }
+        .city-item .info .name { font-weight:700; font-size:.9rem; color:var(--text-dark); }
+        .city-item .info .province { font-size:.75rem; color:var(--text-muted); }
+        .city-item .badge-kota { font-size:.55rem; text-transform:uppercase; font-weight:700; letter-spacing:.5px; padding:2px 10px; border-radius:20px; flex-shrink:0; }
+        .city-item .category-tag { font-size:.6rem; padding:2px 8px; border-radius:12px; background:rgba(58,141,183,0.08); color:var(--text-muted); border:1px solid rgba(58,141,183,0.06); }
+        .no-result { text-align:center; padding:40px 0; color:var(--text-muted); font-size:1rem; grid-column:1/-1; }
+
+        /* ===== MODAL DETAIL KOTA ===== */
+        .modal-detail-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(10px); z-index:1100; display:none; align-items:center; justify-content:center; padding:20px; animation:fadeIn 0.3s ease; }
+        .modal-detail-overlay.active { display:flex; }
+        .modal-detail { background:var(--bg-card); border-radius:var(--radius); max-width:750px; width:100%; max-height:90vh; overflow:hidden; box-shadow:0 24px 80px rgba(0,0,0,0.25); border:1px solid var(--glass-border); animation:slideUp 0.4s ease; transition:background 0.4s, border-color 0.4s; }
+        .modal-detail-header { padding:20px 28px 16px 28px; border-bottom:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; transition:border-color 0.4s; }
+        .modal-detail-header .left { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+        .modal-detail-header .left .big-icon { font-size:2.4rem; }
+        .modal-detail-header .left .title-group h2 { font-size:1.4rem; font-weight:800; color:var(--text-dark); line-height:1.2; transition:color 0.4s; }
+        .modal-detail-header .left .title-group .sub { font-size:.85rem; color:var(--text-muted); transition:color 0.4s; }
+        .modal-detail-header .left .title-group .sub i { color:var(--secondary); margin-right:4px; }
+        .modal-detail-close { width:40px; height:40px; border-radius:50%; border:none; background:var(--bg-main); color:var(--text-muted); font-size:1.2rem; cursor:pointer; transition:var(--transition); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .modal-detail-close:hover { background:rgba(26,107,74,0.08); color:var(--text-dark); transform:rotate(90deg); }
+        .modal-detail-body { padding:24px 28px 28px 28px; overflow-y:auto; max-height:calc(90vh - 80px); }
+
+        .detail-section { margin-bottom:20px; }
+        .detail-section:last-child { margin-bottom:0; }
+        .detail-section .section-label { font-size:.6rem; text-transform:uppercase; font-weight:700; letter-spacing:1.5px; color:var(--secondary); margin-bottom:4px; transition:color 0.4s; }
+        .detail-section .section-title { font-size:1rem; font-weight:700; color:var(--text-dark); margin-bottom:6px; transition:color 0.4s; }
+        .detail-section .section-title i { color:var(--secondary); margin-right:8px; width:22px; }
+        .detail-section p { color:var(--text-muted); font-size:.92rem; line-height:1.7; transition:color 0.4s; }
+        .detail-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+        .detail-tags .tag { background:rgba(58,141,183,0.06); border:1px solid rgba(58,141,183,0.08); padding:3px 12px; border-radius:20px; font-size:.7rem; color:var(--text-muted); transition:background 0.4s, border-color 0.4s, color 0.4s; }
+        .detail-tags .tag i { margin-right:4px; color:var(--secondary); }
+        .detail-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:4px; }
+        .detail-grid-2 .item { background:var(--bg-main); padding:12px 16px; border-radius:12px; border:1px solid var(--glass-border); transition:background 0.4s, border-color 0.4s; }
+        .detail-grid-2 .item .label { font-size:.6rem; text-transform:uppercase; font-weight:700; color:var(--secondary); letter-spacing:.5px; }
+        .detail-grid-2 .item .value { font-weight:600; font-size:.9rem; color:var(--text-dark); margin-top:2px; transition:color 0.4s; }
+        .detail-divider { height:1px; background:var(--glass-border); margin:16px 0; transition:background 0.4s; }
+        .random-fact { background:linear-gradient(135deg, rgba(58,141,183,0.06), rgba(26,107,74,0.06)); border-radius:12px; padding:16px 20px; border-left:4px solid var(--secondary); margin-bottom:16px; transition:background 0.4s, border-color 0.4s; }
+        .random-fact .label { font-size:.6rem; text-transform:uppercase; font-weight:700; color:var(--secondary); letter-spacing:1px; }
+        .random-fact .fact-text { font-size:.95rem; color:var(--text-dark); margin-top:4px; font-style:italic; transition:color 0.4s; }
+        .random-fact .fact-text i { color:var(--accent-gold); margin-right:6px; }
+        .article-preview { background:var(--bg-main); border-radius:12px; padding:14px 18px; border:1px solid var(--glass-border); transition:var(--transition), background 0.4s, border-color 0.4s; cursor:pointer; }
+        .article-preview:hover { background:var(--bg-card-hover); border-color:rgba(26,107,74,0.12); transform:translateX(4px); }
+        .article-preview .title { font-weight:700; font-size:.9rem; color:var(--text-dark); }
+        .article-preview .desc { font-size:.8rem; color:var(--text-muted); margin-top:2px; }
+        .article-preview .meta { font-size:.7rem; color:var(--text-muted); margin-top:4px; display:flex; gap:12px; }
+        .detail-footer { display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+        .detail-footer .btn-secondary { background:var(--primary); }
+        .detail-footer .btn-secondary:hover { background:var(--primary-dark); }
+        .detail-footer .btn-outline-sm { border-color:var(--primary); color:var(--primary); }
+        .detail-footer .btn-outline-sm:hover { background:var(--primary); color:#fff; }
+
+        .footer { background:var(--bg-card); color:var(--text-muted); padding:40px 0 24px; border-top:1px solid var(--glass-border); transition:background 0.4s, border-color 0.4s, color 0.4s; }
+        .footer .container { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+        .footer .brand { font-size:1.2rem; font-weight:700; color:var(--text-dark); transition:color 0.4s; }
+        .footer .brand i { color:var(--secondary); }
+        .footer .brand span { color:var(--primary); }
+        .footer .copy { font-size:.85rem; color:var(--text-muted); transition:color 0.4s; }
+        .footer .socials { display:flex; gap:14px; }
+        .footer .socials a { color:var(--text-muted); font-size:1.1rem; transition:var(--transition); }
+        .footer .socials a:hover { color:var(--primary); transform:translateY(-2px); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width:1024px) { .main-layout { grid-template-columns:1fr; gap:30px; } .map-column { position:relative; top:0; } .map-wrapper { aspect-ratio:4/3; max-height:500px; } .content-column h1 { font-size:2.4rem; } .content-column .description { max-width:100%; } .content-stats { gap:24px; } .content-stats .stat h3 { font-size:1.5rem; } .city-grid { grid-template-columns:1fr; } .detail-grid-2 { grid-template-columns:1fr; } .modal { max-width:95%; } .modal-detail { max-width:95%; } }
+        @media (max-width:768px) { .container { padding:0 16px; } .nav-links { gap:16px; font-size:.85rem; } .nav-links a { font-size:.8rem; } .nav-cta { padding:6px 14px; font-size:.8rem; } .theme-toggle { font-size:.8rem; padding:4px 10px; } .main-layout { padding:20px 0 40px; } .content-column h1 { font-size:1.8rem; } .content-stats { gap:16px; flex-wrap:wrap; } .content-stats .stat h3 { font-size:1.3rem; } .map-wrapper { aspect-ratio:4/3; max-height:350px; } .map-legend { gap:8px; padding:10px 12px; } .map-legend-item { font-size:.65rem; } .drag-hint { font-size:.6rem; padding:4px 12px; } .map-controls button { width:34px; height:34px; font-size:.9rem; } .footer .container { flex-direction:column; text-align:center; } .modal { max-height:90vh; } .modal-header { padding:16px 20px 12px 20px; } .modal-header h2 { font-size:1.1rem; } .modal-body { padding:16px 20px 24px 20px; } .city-grid { grid-template-columns:1fr; gap:8px; } .city-item { padding:10px 14px; } .modal-detail { max-height:95vh; } .modal-detail-header { padding:16px 18px 12px 18px; flex-wrap:wrap; } .modal-detail-header .left { flex-wrap:wrap; } .modal-detail-header .left .big-icon { font-size:1.8rem; } .modal-detail-header .left .title-group h2 { font-size:1.1rem; } .modal-detail-header .left .title-group .sub { font-size:.75rem; } .modal-detail-body { padding:16px 18px 20px 18px; } .detail-grid-2 { grid-template-columns:1fr; } .detail-footer { flex-direction:column; } .detail-footer .btn-secondary, .detail-footer .btn-outline-sm { width:100%; text-align:center; } .search-filter { flex-direction:column; } .search-filter input { width:100%; min-width:unset; } }
+        @media (max-width:480px) { .content-column h1 { font-size:1.5rem; } .content-column .description { font-size:.9rem; } .action-buttons .btn-primary, .action-buttons .btn-outline { padding:10px 20px; font-size:.85rem; width:100%; text-align:center; } .content-stats { justify-content:center; } .map-wrapper { aspect-ratio:1/1; max-height:280px; } .modal-body .intro { font-size:.85rem; } .filter-buttons { justify-content:center; } .filter-btn { font-size:.65rem; padding:4px 12px; } .map-controls button { width:30px; height:30px; font-size:.8rem; } }
+    </style>
+</head>
+<body>
+
+    <!-- ===== PROGRESS BAR ===== -->
+    <div id="progressBar"></div>
+
+    <!-- ===== NAVBAR ===== -->
+    <header class="navbar">
+        <div class="container">
+            <a href="#" class="logo"><i class="fas fa-compass"></i>Nusantara<span>Journeys</span></a>
+            <ul class="nav-links">
+                <li><a href="#">Destinasi</a></li>
+                <li><a href="#">Unggulan</a></li>
+                <li><a href="#" style="color:var(--primary);font-weight:700;">Peta</a></li>
+                <li><a href="#">Artikel</a></li>
+                <li><a href="#" class="nav-cta" id="navJelajahi">Jelajahi <i class="fas fa-arrow-right" style="margin-left:6px;"></i></a></li>
+                <li>
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                        <span id="themeLabel">Mode</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- ===== MAIN LAYOUT ===== -->
+    <main class="main-layout container">
+
+        <!-- KOLOM KIRI: PETA -->
+        <div class="map-column">
+            <div class="map-wrapper" id="mapWrapper">
+                <canvas id="mapCanvas" width="800" height="800"></canvas>
+
+                <!-- Kontrol Zoom -->
+                <div class="map-controls">
+                    <button id="zoomIn" title="Perbesar"><i class="fas fa-plus"></i></button>
+                    <button id="zoomOut" title="Perkecil"><i class="fas fa-minus"></i></button>
+                    <button id="resetZoom" title="Reset Zoom"><i class="fas fa-compress"></i></button>
+                </div>
+
+                <div class="drag-hint" id="dragHint"><i class="fas fa-arrows-up-down"></i><span>Geser peta</span></div>
+                <div class="map-tooltip" id="mapTooltip">
+                    <h4><span class="flag">🏝️</span> <span id="tooltipTitle">Yogyakarta</span></h4>
+                    <p id="tooltipDesc">Klik untuk detail</p>
+                </div>
+            </div>
+            <div class="map-legend">
+                <div class="map-legend-item"><span class="dot gold"></span>Kota Utama</div>
+                <div class="map-legend-item"><span class="dot blue"></span>Ibu Kota Provinsi</div>
+                <div class="map-legend-item"><span class="dot green"></span>Destinasi Wisata</div>
+                <div class="map-legend-item"><span class="hint-icon"><i class="fas fa-hand-pointer"></i> Klik kota</span></div>
+            </div>
+        </div>
+
+        <!-- KOLOM KANAN: KONTEN -->
+        <div class="content-column">
+            <div class="badge-label"><i class="fas fa-globe-asia"></i> &nbsp;Atlas Nusantara</div>
+            <h1>Jelajahi <span>Kota-Kota</span> Indonesia</h1>
+            <p class="description">Setiap minggu kami hadirkan cerita, sejarah, dan keunikan dari berbagai kota di Indonesia. Temukan pesona budaya, kuliner, dan keindahan alamnya.</p>
+            <div class="action-buttons">
+                <a href="#" class="btn-primary" id="btnJelajahi">Mulai Jelajahi <i class="fas fa-arrow-right" style="margin-left:6px;"></i></a>
+                <a href="#" class="btn-outline" id="btnUnggulan">Lihat Unggulan</a>
+            </div>
+            <div class="content-stats">
+                <div class="stat"><h3 id="statProvinsi">34</h3><p>Provinsi</p></div>
+                <div class="stat"><h3 id="statKota">514</h3><p>Kota & Kabupaten</p></div>
+                <div class="stat"><h3 id="statSuku">1.300+</h3><p>Suku Bangsa</p></div>
+            </div>
+            <div class="featured-spot" id="featuredSpot">
+                <div class="label">⭐ Destinasi Unggulan</div>
+                <h3 id="featuredName"><i class="fas fa-temple"></i> Yogyakarta</h3>
+                <p id="featuredDesc">Jantung budaya Jawa — Keraton, Malioboro, dan Candi Borobudur</p>
+                <div class="tags" id="featuredTags"><span>#Budaya</span><span>#Sejarah</span><span>#Kuliner</span><span>#Seni</span></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== MODAL JELAJAHI ===== -->
+    <div class="modal-overlay" id="modalJelajahi">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-map-pin"></i> Atlas <span>Nusantara</span></h2>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="intro">🌏 Dari Sabang sampai Merauke, berikut daftar kota-kota istimewa di Indonesia. <strong>Klik salah satu kota</strong> untuk melihat keunikan, kuliner, budaya, dan tempat rekomendasinya!</p>
+                <div class="search-filter">
+                    <input type="text" id="searchCity" placeholder="🔍 Cari kota..." />
+                    <div class="filter-buttons" id="filterButtons">
+                        <button class="filter-btn active" data-filter="all">Semua</button>
+                        <button class="filter-btn" data-filter="budaya">🏛️ Budaya</button>
+                        <button class="filter-btn" data-filter="kuliner">🍜 Kuliner</button>
+                        <button class="filter-btn" data-filter="alam">🌿 Alam</button>
+                        <button class="filter-btn" data-filter="sejarah">📜 Sejarah</button>
+                    </div>
+                </div>
+                <div class="city-grid" id="cityGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DETAIL KOTA ===== -->
+    <div class="modal-detail-overlay" id="modalDetail">
+        <div class="modal-detail">
+            <div class="modal-detail-header">
+                <div class="left">
+                    <span class="big-icon" id="detailIcon">🏯</span>
+                    <div class="title-group">
+                        <h2 id="detailName">Yogyakarta</h2>
+                        <div class="sub"><i class="fas fa-map-pin"></i> <span id="detailProvince">DIY Yogyakarta</span> · <span id="detailType">⭐ Kota Utama</span></div>
+                    </div>
+                </div>
+                <button class="modal-detail-close" id="detailClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-detail-body" id="detailBody"></div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="brand"><i class="fas fa-compass"></i> Nusantara<span>Journeys</span></div>
+            <div class="copy">&copy; 2026 — Edukasi Kota Indonesia</div>
+            <div class="socials">
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================================================================
+    JAVASCRIPT — DENGAN ZOOM
+    ================================================================ -->
+    <script>
+        // ================================================================
+        // DATA KOTA (30 kota — sama seperti sebelumnya, tidak diubah)
+        // ================================================================
+        const cityData = [{
+            id: 'yogyakarta',
+            name: 'Yogyakarta',
+            province: 'DIY Yogyakarta',
+            icon: '🏯',
+            type: 'gold',
+            typeLabel: '⭐ Kota Utama',
+            category: ['budaya', 'sejarah', 'kuliner'],
+            desc: 'Jantung budaya Jawa dengan keraton yang masih lestari.',
+            unique: 'Kota istimewa yang memadukan tradisi keraton, seni, dan pendidikan. Satu-satunya kota di Indonesia yang masih memiliki kerajaan (Kasultanan Ngayogyakarta Hadiningrat) yang berperan dalam pemerintahan.',
+            places: ['Keraton Yogyakarta', 'Malioboro', 'Candi Borobudur', 'Candi Prambanan', 'Taman Sari'],
+            food: ['Gudeg', 'Angkringan', 'Bakpia Pathok', 'Sate Klathak', 'Wedang Ronde'],
+            culture: ['Wayang Kulit', 'Batik Yogyakarta', 'Gamelan', 'Tari Bedhaya', 'Sekaten'],
+            funFact: 'Yogyakarta memiliki dua gubernur: satu dari Kesultanan dan satu dari pemerintah!',
+            motto: 'Hanthi-Hanthi, Sinawung, Resmining, Gusti',
+            population: '3.6 juta',
+            area: '3.185 km²',
+            established: '1755',
+            articles: [
+                { title: 'Menelusuri Sejarah Keraton Yogyakarta', desc: 'Perjalanan panjang kerajaan yang masih berdiri hingga kini.' },
+                { title: 'Kuliner Yogyakarta yang Mendunia', desc: 'Dari gudeg hingga angkringan, cita rasa yang tak terlupakan.' }
+            ]
+        }, {
+            id: 'raja-ampat',
+            name: 'Raja Ampat',
+            province: 'Papua Barat',
+            icon: '🐠',
+            type: 'gold',
+            typeLabel: '⭐ Kota Utama',
+            category: ['alam', 'petualangan'],
+            desc: 'Surga bawah laut dengan keanekaragaman hayati tertinggi di dunia.',
+            unique: 'Kepulauan Raja Ampat adalah rumah bagi 75% spesies karang dunia dan lebih dari 1.500 spesies ikan. Dinamai "Raja Ampat" dari legenda empat raja yang menjaga pulau-pulau ini.',
+            places: ['Piaynemo', 'Wayag', 'Misool', 'Arborek', 'Kri Island'],
+            food: ['Ikan Bakar', 'Papeda', 'Sambal Colo-Colo', 'Udang Selingkuh', 'Kerang'],
+            culture: ['Tari Yospan', 'Ukiran Papua', 'Noken', 'Perang Suku', 'Tato Tradisional'],
+            funFact: 'Raja Ampat memiliki spesies ikan pari manta yang bisa ditemukan sepanjang tahun!',
+            motto: 'The Last Paradise',
+            population: '64.000',
+            area: '46.000 km²',
+            established: '2003',
+            articles: [
+                { title: 'Menyelam di Surga Raja Ampat', desc: 'Keindahan bawah laut yang tak tertandingi.' },
+                { title: 'Budaya Papua di Raja Ampat', desc: 'Kearifan lokal yang masih lestari.' }
+            ]
+        }, {
+            id: 'jakarta',
+            name: 'Jakarta',
+            province: 'DKI Jakarta',
+            icon: '🏛️',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['sejarah', 'budaya', 'kuliner'],
+            desc: 'Ibu kota Indonesia yang dinamis dan multi-kultur.',
+            unique: 'Jakarta adalah kota dengan kepadatan tertinggi di Indonesia dan menjadi pusat pemerintahan, ekonomi, dan budaya. Nama "Jakarta" berasal dari kata "Jayakarta" yang berarti "kemenangan" dalam bahasa Sanskerta.',
+            places: ['Monas', 'Kota Tua', 'TMII', 'Ancol', 'Gelora Bung Karno'],
+            food: ['Kerak Telor', 'Soto Betawi', 'Asinan Betawi', 'Nasi Uduk', 'Ketan Susu'],
+            culture: ['Ondel-Ondel', 'Lenong Betawi', 'Topeng Betawi', 'Gambang Kromong', 'Silat Betawi'],
+            funFact: 'Jakarta adalah kota dengan jumlah pusat perbelanjaan terbanyak di dunia!',
+            motto: 'Jaya Raya',
+            population: '10.6 juta',
+            area: '661 km²',
+            established: '1527',
+            articles: [
+                { title: 'Jelajahi Kota Tua Jakarta', desc: 'Menyusuri peninggalan sejarah di pusat kota.' },
+                { title: 'Kuliner Betawi yang Legendaris', desc: 'Kerak telor hingga soto betawi yang menggoda.' }
+            ]
+        }, {
+            id: 'medan',
+            name: 'Medan',
+            province: 'Sumatera Utara',
+            icon: '🌴',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['budaya', 'kuliner'],
+            desc: 'Kota Melayu yang kaya akan budaya dan kuliner.',
+            unique: 'Medan adalah kota terbesar di Sumatera dan merupakan pusat perdagangan dengan pengaruh budaya Melayu, Batak, Tionghoa, dan India yang kuat. Kota ini dikenal sebagai "Paris van Sumatra" pada masa kolonial.',
+            places: ['Istana Maimun', 'Tjong A Fie Mansion', 'Gunung Sinabung', 'Danau Toba', 'Berastagi'],
+            food: ['Bika Ambon', 'Soto Medan', 'Kwetiau Medan', 'Durian Ucok', 'Lempeng'],
+            culture: ['Tari Tortor', 'Gondang Batak', 'Ulos Batak', 'Melayu Deli', 'Rendang Minang'],
+            funFact: 'Medan memiliki komunitas Tionghoa terbesar di Sumatera dengan sejarah yang panjang!',
+            motto: 'Bersatu, Teguh, dan Amanah',
+            population: '2.5 juta',
+            area: '265 km²',
+            established: '1590',
+            articles: [
+                { title: 'Istana Maimun: Sisa Kejayaan Melayu', desc: 'Keindahan arsitektur istana yang memukau.' },
+                { title: 'Durian Ucok: Surga Pecinta Durian', desc: 'Durian terbaik di Sumatra Utara.' }
+            ]
+        }, {
+            id: 'makassar',
+            name: 'Makassar',
+            province: 'Sulawesi Selatan',
+            icon: '⛵',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['sejarah', 'budaya', 'kuliner'],
+            desc: 'Pintu gerbang timur Indonesia dengan budaya bahari yang kuat.',
+            unique: 'Makassar adalah kota pelabuhan penting yang menjadi pintu gerbang ke Indonesia timur. Suku Bugis dan Makassar terkenal sebagai pelaut handal yang menjelajahi lautan Nusantara hingga ke Madagaskar.',
+            places: ['Fort Rotterdam', 'Pantai Losari', 'Trans Studio', 'Taman Nasional Taka Bonerate', 'Bantimurung'],
+            food: ['Coto Makassar', 'Konro', 'Pallubasa', 'Es Pisang Ijo', 'Sop Saudara'],
+            culture: ['Phinisi Kapal', 'Tari Pakarena', 'Tenun Sutera', 'Silat Makassar', 'Mappadendang'],
+            funFact: 'Kapal Phinisi dari Makassar menjadi ikon kapal layar tradisional yang mendunia!',
+            motto: 'Makassar Kota Maritim',
+            population: '1.5 juta',
+            area: '175 km²',
+            established: '1607',
+            articles: [
+                { title: 'Fort Rotterdam: Saksi Bisu Sejarah', desc: 'Benteng peninggalan Gowa-Tallo.' },
+                { title: 'Coto Makassar: Kuliner Legendaris', desc: 'Sup kambing yang menggugah selera.' }
+            ]
+        }, {
+            id: 'bandung',
+            name: 'Bandung',
+            province: 'Jawa Barat',
+            icon: '🌋',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['alam', 'budaya', 'kuliner'],
+            desc: 'Kota kembang yang sejuk dan penuh kreativitas.',
+            unique: 'Bandung dikenal sebagai "Paris van Java" karena keindahan alam dan arsitektur Art Deco-nya. Kota ini menjadi pusat fashion dan kuliner kreatif yang menarik wisatawan dari seluruh Indonesia.',
+            places: ['Gedung Sate', 'Kawah Putih', 'Tangkuban Perahu', 'Dago Pakar', 'Floating Market'],
+            food: ['Bakso', 'Mie Kocok', 'Surabi', 'Batagor', 'Colenak'],
+            culture: ['Angklung', 'Tari Jaipong', 'Wayang Golek', 'Kecapi Suling', 'Batik Ciamis'],
+            funFact: 'Bandung memiliki lebih dari 100 bangunan bergaya Art Deco yang masih terawat!',
+            motto: 'Bermartabat, Kreatif, Mandiri',
+            population: '2.5 juta',
+            area: '167 km²',
+            established: '1810',
+            articles: [
+                { title: 'Kawah Putih: Keindahan yang Menyimpan Cerita', desc: 'Danau kawah dengan warna putih kehijauan.' },
+                { title: 'Angklung: Warisan Budaya Dunia', desc: 'Alat musik bambu yang mendunia.' }
+            ]
+        }, {
+            id: 'bali',
+            name: 'Denpasar',
+            province: 'Bali',
+            icon: '🌺',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['budaya', 'alam', 'kuliner'],
+            desc: 'Pulau dewata yang memesona dengan budaya dan alamnya.',
+            unique: 'Bali adalah pulau dengan mayoritas Hindu di Indonesia. Budaya, seni, dan tradisi Bali sangat kaya dan menjadi daya tarik utama bagi wisatawan dunia. Setiap hari ada upacara keagamaan!',
+            places: ['Pura Tanah Lot', 'Ubud', 'Kuta', 'Garuda Wisnu Kencana', 'Bali Safari'],
+            food: ['Babi Guling', 'Lawar', 'Sate Lilit', 'Nasi Campur Bali', 'Pisang Goreng'],
+            culture: ['Tari Kecak', 'Tari Barong', 'Ogoh-Ogoh', 'Upacara Ngaben', 'Melukat'],
+            funFact: 'Di Bali, ada lebih dari 20.000 pura yang tersebar di seluruh pulau!',
+            motto: 'Om Swastiastu',
+            population: '4.2 juta',
+            area: '5.780 km²',
+            established: '1958',
+            articles: [
+                { title: 'Tari Kecak: Pertunjukan yang Memukau', desc: 'Tari yang menceritakan kisah Ramayana.' },
+                { title: 'Kuliner Khas Bali: Babi Guling', desc: 'Rasanya yang gurih dan renyah.' }
+            ]
+        }, {
+            id: 'manado',
+            name: 'Manado',
+            province: 'Sulawesi Utara',
+            icon: '🐚',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['alam', 'kuliner'],
+            desc: 'Kota Tinutuan dengan laut yang memukau.',
+            unique: 'Manado adalah pintu gerbang ke Bunaken, salah satu surga menyelam terbaik di dunia. Budaya Minahasa yang unik dan makanan ekstrem seperti "paniki" (kelelawar) menjadi ciri khas kota ini.',
+            places: ['Bunaken', 'Gunung Lokon', 'Tangkoko', 'Mahawu', 'Taman Laut Bunaken'],
+            food: ['Tinutuan', 'Rica-Rica', 'Paniki', 'Nasi Kuning Manado', 'Cakalang'],
+            culture: ['Tari Maengket', 'Kolintang', 'Kabasaran', 'Minahasa', 'Makanan Ekstrem'],
+            funFact: 'Manado memiliki taman laut Bunaken yang menjadi situs warisan dunia!',
+            motto: 'Manado Ibu Kota Pariwisata',
+            population: '451.000',
+            area: '157 km²',
+            established: '1623',
+            articles: [
+                { title: 'Bunaken: Surga Bawah Laut', desc: 'Keindahan terumbu karang dan biota laut.' },
+                { title: 'Tinutuan: Bubur Khas Manado', desc: 'Bubur sayur yang hangat dan lezat.' }
+            ]
+        }, {
+            id: 'padang',
+            name: 'Padang',
+            province: 'Sumatera Barat',
+            icon: '🍲',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['kuliner', 'budaya'],
+            desc: 'Ibu kota masakan Padang yang mendunia.',
+            unique: 'Padang adalah kota dengan kuliner paling dikenal di dunia internasional. Masakan Padang dengan ciri khas bumbu rempah yang kuat dan balado telah menyebar ke seluruh dunia melalui perantau Minang.',
+            places: ['Pantai Padang', 'Jam Gadang', 'Sianok Canyon', 'Danau Singkarak', 'Air Manis'],
+            food: ['Rendang', 'Sate Padang', 'Dendeng Balado', 'Gulai', 'Keripik Sanjai'],
+            culture: ['Tari Piring', 'Tari Indang', 'Rumah Gadang', 'Randai', 'Silat Minang'],
+            funFact: 'Rendang dinobatkan sebagai makanan terenak di dunia oleh CNN pada 2017!',
+            motto: 'Padang Kota Tercinta',
+            population: '1.0 juta',
+            area: '694 km²',
+            established: '1669',
+            articles: [
+                { title: 'Rendang: Makanan Terenak di Dunia', desc: 'Daging sapi dimasak dengan santan dan rempah.' },
+                { title: 'Jam Gadang: Ikon Kota Padang', desc: 'Menara jam peninggalan Belanda.' }
+            ]
+        }, {
+            id: 'pontianak',
+            name: 'Pontianak',
+            province: 'Kalimantan Barat',
+            icon: '🌳',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['sejarah', 'budaya'],
+            desc: 'Kota khatulistiwa yang unik dan bersejarah.',
+            unique: 'Pontianak adalah satu-satunya kota di Indonesia yang dilalui oleh garis khatulistiwa. Legenda tentang "Kuntilanak" (hantu) menjadi asal-usul nama kota ini, yang kemudian dibangun untuk mengusirnya.',
+            places: ['Tugu Khatulistiwa', 'Keraton Kadriah', 'Sungai Kapuas', 'Betang', 'Taman Alun Kapuas'],
+            food: ['Pisang Pontianak', 'Mie Keriting', 'Bubur Pedas', 'Kue Tepung', 'Ikan Siput'],
+            culture: ['Tari Zarah', 'Badong', 'Tari Tandem', 'Rumah Betang', 'Borneo'],
+            funFact: 'Pontianak adalah satu-satunya kota di dunia yang tepat dilalui garis khatulistiwa!',
+            motto: 'Pontianak Kota Khatulistiwa',
+            population: '670.000',
+            area: '118 km²',
+            established: '1771',
+            articles: [
+                { title: 'Tugu Khatulistiwa: Titik Nol Dunia', desc: 'Monumen yang menandai garis khatulistiwa.' },
+                { title: 'Keraton Kadriah: Istana di Atas Air', desc: 'Istana Kesultanan Pontianak.' }
+            ]
+        }, {
+            id: 'palu',
+            name: 'Palu',
+            province: 'Sulawesi Tengah',
+            icon: '🏝️',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['alam', 'budaya'],
+            desc: 'Kota dengan teluk yang indah dan budaya yang kaya.',
+            unique: 'Palu berada di ujung utara Teluk Palu yang indah. Kota ini memiliki sejarah panjang sebagai pusat perdagangan di Sulawesi Tengah dan terkenal dengan tradisi "Meraka" yang unik.',
+            places: ['Teluk Palu', 'Danau Lindu', 'Taman Lore Lindu', 'Pantai Talise', 'Gunung Gawalise'],
+            food: ['Nasi Kuning Palu', 'Sate Sapi', 'Kapurung', 'Palguna', 'Ikan Masak Kuning'],
+            culture: ['Tari Balia', 'Tari Modero', 'Rempah', 'Nobar', 'Boneka'],
+            funFact: 'Lembah Lore Lindu di dekat Palu menyimpan banyak megalitik kuno!',
+            motto: 'Palu Kota Teluk',
+            population: '373.000',
+            area: '395 km²',
+            established: '1978',
+            articles: [
+                { title: 'Lore Lindu: Situs Megalitik', desc: 'Batu-batu kuno yang menyimpan misteri.' },
+                { title: 'Teluk Palu: Pesona Alam yang Menenangkan', desc: 'Keindahan teluk dengan latar pegunungan.' }
+            ]
+        }, {
+            id: 'aceh',
+            name: 'Banda Aceh',
+            province: 'Aceh',
+            icon: '🕌',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['sejarah', 'budaya'],
+            desc: 'Serambi Mekkah dengan sejarah dan budaya Islam yang kuat.',
+            unique: 'Banda Aceh adalah kota dengan penerapan hukum syariah di Indonesia. Kota ini memiliki masjid Baiturrahman yang megah dan menjadi simbol ketahanan masyarakat Aceh pasca tsunami 2004.',
+            places: ['Masjid Raya Baiturrahman', 'Museum Tsunami', 'Kapal Tsunami', 'Pulau Weh', 'Kherkhoff'],
+            food: ['Mie Aceh', 'Kuah Pliek', 'Sate Matang', 'Roti Canai', 'Kopi Aceh'],
+            culture: ['Tari Seudati', 'Tari Saman', 'Tari Ratoh Jaroe', 'Rapai', 'Kesenian Aceh'],
+            funFact: 'Aceh adalah satu-satunya provinsi di Indonesia yang menerapkan hukum syariah!',
+            motto: 'Serambi Mekkah',
+            population: '255.000',
+            area: '61 km²',
+            established: '1205',
+            articles: [
+                { title: 'Masjid Raya Baiturrahman: Simbol Ketahanan', desc: 'Masjid yang tetap berdiri meski tsunami.' },
+                { title: 'Tari Saman: Warisan Budaya Dunia', desc: 'Tari yang memukau dengan kekompakan.' }
+            ]
+        }, {
+            id: 'semarang',
+            name: 'Semarang',
+            province: 'Jawa Tengah',
+            icon: '⛩️',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['sejarah', 'budaya', 'kuliner'],
+            desc: 'Kota lumpia yang kaya akan sejarah dan kuliner.',
+            unique: 'Semarang adalah kota dengan perpaduan budaya Jawa, Tionghoa, dan Belanda yang kental. Kota ini menjadi pusat pemerintahan Jawa Tengah dan terkenal dengan bangunan Lawang Sewu yang bersejarah.',
+            places: ['Lawang Sewu', 'Klenteng Sam Poo Kong', 'Kota Lama', 'Masjid Agung', 'Gua Kreo'],
+            food: ['Lumpia', 'Bandeng Juwana', 'Tahu Gimbal', 'Nasi Ayam', 'Soto Bangkong'],
+            culture: ['Tari Gambang Semarang', 'Wayang Kulit', 'Dugderan', 'Warak', 'Lenteng'],
+            funFact: 'Semarang memiliki klenteng tertua di Indonesia, Sam Poo Kong!',
+            motto: 'Semarang Kota Lama',
+            population: '1.9 juta',
+            area: '373 km²',
+            established: '1547',
+            articles: [
+                { title: 'Lawang Sewu: Gedung Seribu Pintu', desc: 'Bangunan bersejarah dengan arsitektur art deco.' },
+                { title: 'Lumpia Semarang: Kuliner Perpaduan Budaya', desc: 'Lumpia dengan isian rebung dan telur.' }
+            ]
+        }, {
+            id: 'surabaya',
+            name: 'Surabaya',
+            province: 'Jawa Timur',
+            icon: '🦈',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['sejarah', 'budaya', 'kuliner'],
+            desc: 'Kota pahlawan dengan semangat perjuangan yang tak padam.',
+            unique: 'Surabaya adalah kota pahlawan yang menjadi saksi perlawanan rakyat Indonesia dalam Pertempuran 10 November 1945. Kota ini juga dikenal dengan julukan "Kota Hiu" dan "Kota Buaya" yang melambangkan keberanian.',
+            places: ['Tugu Pahlawan', 'Monumen Kapal Selam', 'Jembatan Suramadu', 'Kota Tua Surabaya', 'Museum Mpu Tantular'],
+            food: ['Rujak Cingur', 'Soto Ayam', 'Kare Ayam', 'Lontong Balap', 'Bakso Malang'],
+            culture: ['Tari Remo', 'Ludruk', 'Reog Ponorogo', 'Karapan Sapi', 'Wayang Kulit'],
+            funFact: 'Nama Surabaya berasal dari cerita perang antara sura (hiu) dan baya (buaya)!',
+            motto: 'Surabaya Kota Pahlawan',
+            population: '3.0 juta',
+            area: '350 km²',
+            established: '1293',
+            articles: [
+                { title: 'Tugu Pahlawan: Simbol Perjuangan', desc: 'Monumen untuk mengenang pertempuran 10 November.' },
+                { title: 'Rujak Cingur: Kuliner Khas Surabaya', desc: 'Rujak dengan cingur yang gurih.' }
+            ]
+        }, {
+            id: 'balikpapan',
+            name: 'Balikpapan',
+            province: 'Kalimantan Timur',
+            icon: '🛢️',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['alam', 'ekonomi'],
+            desc: 'Kota minyak dengan keindahan pesisir yang memukau.',
+            unique: 'Balikpapan adalah kota industri minyak tertua di Indonesia. Di sini terdapat kilang minyak Pertamina yang menjadi tulang punggung perekonomian. Selain itu, kota ini dikelilingi oleh hutan tropis dan pantai.',
+            places: ['Pantai Kemala', 'Kebun Raya Balikpapan', 'Hutan Lindung', 'Mangrove Center', 'Monumen Perjuangan'],
+            food: ['Sate Balikpapan', 'Ikan Bakar', 'Nasi Kuning', 'Kue Balikpapan', 'Es Krim'],
+            culture: ['Tari Dayak', 'Hudoq', 'Kenyah', 'Pesta Adat', 'Tenun'],
+            funFact: 'Balikpapan memiliki kilang minyak yang sudah beroperasi sejak 1922!',
+            motto: 'Balikpapan Kota Minyak',
+            population: '700.000',
+            area: '503 km²',
+            established: '1897',
+            articles: [
+                { title: 'Kilang Minyak Balikpapan: Pusat Energi', desc: 'Sejarah panjang industri minyak di Kalimantan.' },
+                { title: 'Pantai Kemala: Pesona Pesisir Timur', desc: 'Pantai dengan pasir putih dan air jernih.' }
+            ]
+        }, {
+            id: 'jayapura',
+            name: 'Jayapura',
+            province: 'Papua',
+            icon: '🏔️',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['alam', 'budaya'],
+            desc: 'Pintu gerbang menuju keindahan Papua.',
+            unique: 'Jayapura adalah kota dengan pemandangan alam yang spektakuler, dikelilingi pegunungan dan teluk. Kota ini menjadi pusat pemerintahan dan ekonomi di Papua, serta pintu gerbang ke keindahan Danau Sentani.',
+            places: ['Danau Sentani', 'Gunung Cycloop', 'Pantai Hamadi', 'Museum Loka Budaya', 'Base G'],
+            food: ['Papeda', 'Ikan Roa', 'Sagu', 'Udang', 'Sayur Kelapa'],
+            culture: ['Tari Yospan', 'Tari Rumbu', 'Noken', 'Ukiran', 'Tato Mentawai'],
+            funFact: 'Danau Sentani di Jayapura memiliki festival tahunan yang melibatkan seluruh suku di Papua!',
+            motto: 'Jayapura Kota Penuh Cinta',
+            population: '400.000',
+            area: '935 km²',
+            established: '1910',
+            articles: [
+                { title: 'Danau Sentani: Festival Budaya Papua', desc: 'Festival tahunan yang melibatkan seluruh suku.' },
+                { title: 'Noken: Tas Khas Papua', desc: 'Kerajinan anyaman yang mendunia.' }
+            ]
+        }, {
+            id: 'palembang',
+            name: 'Palembang',
+            province: 'Sumatera Selatan',
+            icon: '🏺',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['sejarah', 'kuliner', 'budaya'],
+            desc: 'Kota pempek dengan sejarah kerajaan Sriwijaya.',
+            unique: 'Palembang adalah kota dengan sejarah Kerajaan Sriwijaya yang pernah menjadi pusat Buddha terbesar di Asia Tenggara. Sungai Musi menjadi urat nadi kehidupan dan ikon Jembatan Ampera.',
+            places: ['Jembatan Ampera', 'Bukit Siguntang', 'Museum Sultan Mahmud Badaruddin', 'Benteng Kuto Besak', 'Pulau Kemaro'],
+            food: ['Pempek', 'Tekwan', 'Model', 'Laksan', 'Kemplang'],
+            culture: ['Tari Gending Sriwijaya', 'Tari Bedana', 'Wayang Kulit', 'Seni Banyan', 'Bangau'],
+            funFact: 'Palembang adalah pusat Kerajaan Sriwijaya yang berjaya pada abad ke-7!',
+            motto: 'Palembang Darussalam',
+            population: '1.7 juta',
+            area: '400 km²',
+            established: '683',
+            articles: [
+                { title: 'Jembatan Ampera: Ikon Kota Palembang', desc: 'Jembatan kebanggaan masyarakat Sumsel.' },
+                { title: 'Pempek: Kuliner Legendaris Palembang', desc: 'Ikan digiling dengan sagu, disajikan dengan cuko.' }
+            ]
+        }, {
+            id: 'ternate',
+            name: 'Ternate',
+            province: 'Maluku Utara',
+            icon: '🌋',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['sejarah', 'alam', 'kuliner'],
+            desc: 'Kota rempah yang bersejarah di ujung timur Nusantara.',
+            unique: 'Ternate adalah kota yang menjadi pusat perdagangan rempah-rempah dunia pada abad ke-16. Gunung Gamalama yang ikonik menjadi latar belakang kota ini yang kaya akan sejarah kolonial Portugis dan Spanyol.',
+            places: ['Gunung Gamalama', 'Benteng Oranje', 'Benteng Kalamata', 'Rumah Budaya', 'Pantai Sulamadaha'],
+            food: ['Ikan Asar', 'Papeda', 'Roti Kacang', 'Sambal Dabu-Dabu', 'Cakalang Fufu'],
+            culture: ['Tari Cakalele', 'Bambu Gila', 'Tari Lenso', 'Paskah', 'Rempah'],
+            funFact: 'Ternate adalah salah satu pusat perdagangan cengkeh dan pala tertua di dunia!',
+            motto: 'Ternate Kota Rempah',
+            population: '205.000',
+            area: '547 km²',
+            established: '1250',
+            articles: [
+                { title: 'Gunung Gamalama: Penjaga Kota Ternate', desc: 'Gunung api yang menjadi ikon Maluku Utara.' },
+                { title: 'Cengkeh dan Pala: Rempah Nusantara', desc: 'Komoditas yang pernah memperebutkan dunia.' }
+            ]
+        },
+        // === KOTA TAMBAHAN 5 ===
+        {
+            id: 'samarinda',
+            name: 'Samarinda',
+            province: 'Kalimantan Timur',
+            icon: '🌊',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['alam', 'ekonomi'],
+            desc: 'Kota di tepi Sungai Mahakam dengan pesona alam dan ekonomi yang tumbuh.',
+            unique: 'Samarinda adalah ibu kota Kalimantan Timur yang terletak di tepi Sungai Mahakam. Kota ini dikenal sebagai pusat pemerintahan dan ekonomi, serta menjadi gerbang menuju Ibu Kota Nusantara (IKN) yang sedang dibangun.',
+            places: ['Sungai Mahakam', 'Taman Hutan Raya Bukit Soeharto', 'Pulau Kumala', 'Museum Mulawarman', 'Danau Jempang'],
+            food: ['Pisang Gapit', 'Amplang', 'Mie Samarinda', 'Ketupat Kandangan', 'Ikan Baung'],
+            culture: ['Tari Gantar', 'Tari Kancet Papatai', 'Rumah Lamin', 'Festival Erau', 'Tenun Samarinda'],
+            funFact: 'Samarinda adalah kota terbesar di Kalimantan Timur dan menjadi pintu menuju IKN Nusantara!',
+            motto: 'Samarinda Kota Tepian',
+            population: '842.000',
+            area: '718 km²',
+            established: '1668',
+            articles: [
+                { title: 'Menjelajahi Sungai Mahakam', desc: 'Keindahan sungai terpanjang di Kalimantan.' },
+                { title: 'IKN Nusantara: Masa Depan Indonesia', desc: 'Bagaimana Samarinda menjadi gerbang ibu kota baru.' }
+            ]
+        }, {
+            id: 'banjarmasin',
+            name: 'Banjarmasin',
+            province: 'Kalimantan Selatan',
+            icon: '🚣',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['budaya', 'kuliner'],
+            desc: 'Kota seribu sungai dengan pasar terapung yang ikonik.',
+            unique: 'Banjarmasin dikenal sebagai "Kota Seribu Sungai" karena memiliki banyak aliran sungai yang membelah kota. Pasar terapung di Sungai Martapura menjadi daya tarik utama dan merupakan warisan budaya yang masih lestari.',
+            places: ['Pasar Terapung Lok Baintan', 'Pulau Kembang', 'Sungai Martapura', 'Museum Wasaka', 'Taman Siring'],
+            food: ['Soto Banjar', 'Ketupat Kandangan', 'Apam Barabai', 'Wadai Banjar', 'Ikan Haruan'],
+            culture: ['Tari Baksa Kembang', 'Mamanda (Teater)', 'Wayang Banjar', 'Madihin', 'Saputangan Banjar'],
+            funFact: 'Banjarmasin memiliki pasar terapung yang sudah ada sejak abad ke-16!',
+            motto: 'Banjarmasin Kota Seribu Sungai',
+            population: '657.000',
+            area: '98 km²',
+            established: '1526',
+            articles: [
+                { title: 'Pasar Terapung Banjarmasin', desc: 'Tradisi jual-beli di atas air yang memukau.' },
+                { title: 'Kuliner Banjar: Soto dan Wadai', desc: 'Kelezatan masakan khas Kalimantan Selatan.' }
+            ]
+        }, {
+            id: 'kupang',
+            name: 'Kupang',
+            province: 'Nusa Tenggara Timur',
+            icon: '🏝️',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['alam', 'budaya'],
+            desc: 'Pintu gerbang ke Nusa Tenggara dengan keindahan pantai dan budaya yang kaya.',
+            unique: 'Kupang adalah ibu kota provinsi Nusa Tenggara Timur yang terletak di ujung barat Pulau Timor. Kota ini menjadi pintu masuk ke berbagai destinasi wisata alam seperti Pulau Semau dan Taman Nasional Komodo.',
+            places: ['Pantai Lasiana', 'Pulau Semau', 'Taman Nasional Komodo', 'Museum Negeri', 'Gua Kristal'],
+            food: ['Jagung Bose', 'Ikan Bakar Kupang', 'Se\'i Sapi', 'Sambal Luak', 'Roti Kupang'],
+            culture: ['Tari Likurai', 'Tari Tebe', 'Tenun Timor', 'Sasando', 'Upacara Penti'],
+            funFact: 'Kupang adalah kota dengan jumlah gereja terbanyak per kapita di Indonesia!',
+            motto: 'Kupang Kota Kasih',
+            population: '466.000',
+            area: '180 km²',
+            established: '1886',
+            articles: [
+                { title: 'Pantai Lasiana: Pesona Timur Indonesia', desc: 'Keindahan pantai dengan pasir putih.' },
+                { title: 'Sasando: Alat Musik Khas NTT', desc: 'Bunyi merdu dari daun lontar.' }
+            ]
+        }, {
+            id: 'ambon',
+            name: 'Ambon',
+            province: 'Maluku',
+            icon: '🌶️',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['sejarah', 'kuliner'],
+            desc: 'Kota rempah yang bersejarah di tengah kepulauan Maluku.',
+            unique: 'Ambon adalah kota yang menjadi pusat perdagangan rempah-rempah dunia pada abad ke-16 hingga ke-18. Kota ini juga memiliki sejarah kelam sebagai tempat pengasingan Bung Hatta dan merupakan kota kelahiran Pattimura.',
+            places: ['Benteng Victoria', 'Gereja Mardika', 'Pantai Natsepa', 'Museum Siwalima', 'Monument Pattimura'],
+            food: ['Papeda', 'Ikan Asar', 'Roti Pia', 'Sagu', 'Sambal Dabu-Dabu'],
+            culture: ['Tari Cakalele', 'Tari Lenso', 'Gendang', 'Music Ambon', 'Upacara Koa'],
+            funFact: 'Ambon adalah kota kelahiran pahlawan nasional Pattimura dan tempat pengasingan Bung Hatta!',
+            motto: 'Ambon Kota Manise',
+            population: '372.000',
+            area: '359 km²',
+            established: '1575',
+            articles: [
+                { title: 'Benteng Victoria: Saksi Sejarah Rempah', desc: 'Benteng peninggalan Portugis di pusat kota.' },
+                { title: 'Papeda: Makanan Khas Maluku', desc: 'Bubur sagu yang menyatu dengan kehidupan masyarakat.' }
+            ]
+        }, {
+            id: 'pekanbaru',
+            name: 'Pekanbaru',
+            province: 'Riau',
+            icon: '🛢️',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['ekonomi', 'budaya'],
+            desc: 'Kota minyak dan pusat budaya Melayu di Sumatera.',
+            unique: 'Pekanbaru adalah kota yang menjadi pusat industri minyak di Sumatera, sekaligus pusat budaya Melayu yang kental. Kota ini terkenal dengan arsitektur rumah Melayu dan kuliner yang kaya rempah.',
+            places: ['Taman Alam Sultan Syarif Hasyim', 'Anjung Seni', 'Pekanbaru Mall', 'Sungai Siak', 'Kampung Melayu'],
+            food: ['Mie Lendir', 'Nasi Goreng', 'Soto Pekanbaru', 'Kue Bangkit', 'Es Teler'],
+            culture: ['Tari Zapin', 'Tari Tepak', 'Gendang Melayu', 'Pantun', 'Rumah Melayu'],
+            funFact: 'Pekanbaru adalah kota dengan produksi minyak bumi terbesar di Indonesia!',
+            motto: 'Pekanbaru Kota Bertuah',
+            population: '1.1 juta',
+            area: '632 km²',
+            established: '1784',
+            articles: [
+                { title: 'Industri Minyak Pekanbaru', desc: 'Perjalanan panjang industri minyak di Riau.' },
+                { title: 'Budaya Melayu di Pekanbaru', desc: 'Tarian dan tradisi yang masih lestari.' }
+            ]
+        },
+        // === KOTA TAMBAHAN 7 ===
+        {
+            id: 'palangka-raya',
+            name: 'Palangka Raya',
+            province: 'Kalimantan Tengah',
+            icon: '🌳',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['alam', 'sejarah'],
+            desc: 'Kota di tepi Sungai Kahayan dengan hutan tropis dan kedamaian.',
+            unique: 'Palangka Raya adalah ibu kota Kalimantan Tengah yang terletak di tepi Sungai Kahayan. Kota ini dirancang sebagai kota taman dengan banyak ruang terbuka hijau dan menjadi pusat pemerintahan serta pendidikan di Kalimantan Tengah.',
+            places: ['Taman Nasional Sebangau', 'Sungai Kahayan', 'Kota Tua Palangka', 'Museum Balanga', 'Bukit Tangkiling'],
+            food: ['Ketupat Kandangan', 'Amplang', 'Soto Banjar', 'Ikan Baung', 'Pisang Gapit'],
+            culture: ['Tari Tambun Bungai', 'Tari Gantar', 'Rumah Betang', 'Festival Dayak', 'Tenun Dayak'],
+            funFact: 'Palangka Raya adalah salah satu kota dengan luas wilayah terbesar di Indonesia!',
+            motto: 'Palangka Raya Kota Cantik',
+            population: '293.000',
+            area: '2.399 km²',
+            established: '1957',
+            articles: [
+                { title: 'Taman Nasional Sebangau', desc: 'Hutan rawa gambut terbesar di Kalimantan.' },
+                { title: 'Sungai Kahayan: Jantung Palangka', desc: 'Kehidupan masyarakat di tepi sungai.' }
+            ]
+        }, {
+            id: 'gorontalo',
+            name: 'Gorontalo',
+            province: 'Gorontalo',
+            icon: '🏖️',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['alam', 'budaya'],
+            desc: 'Kota dengan pantai indah dan budaya yang kaya.',
+            unique: 'Gorontalo adalah ibu kota provinsi Gorontalo yang terletak di Sulawesi. Kota ini memiliki pantai yang memukau dan terkenal dengan tradisi "Mohuna" dan "Limboto" serta makanan khas seperti "Binthe Biluhuta".',
+            places: ['Pantai Olele', 'Danau Limboto', 'Benteng Otanaha', 'Masjid Agung', 'Pulau Saronde'],
+            food: ['Binthe Biluhuta', 'Milu', 'Sate Gorontalo', 'Nasi Kuning', 'Pisang Gorontalo'],
+            culture: ['Tari Dana-Dana', 'Tari Saronde', 'Mohuna', 'Limboto', 'Tenun Gorontalo'],
+            funFact: 'Gorontalo memiliki pantai Olele yang terkenal dengan biota laut yang indah!',
+            motto: 'Gorontalo, Bumi Serambi Madinah',
+            population: '198.000',
+            area: '64 km²',
+            established: '1728',
+            articles: [
+                { title: 'Pantai Olele: Pesona Bawah Laut', desc: 'Keindahan terumbu karang dan biota laut.' },
+                { title: 'Danau Limboto: Danau yang Menyusut', desc: 'Kisah danau terbesar di Gorontalo.' }
+            ]
+        }, {
+            id: 'mataram',
+            name: 'Mataram',
+            province: 'Nusa Tenggara Barat',
+            icon: '🏯',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['budaya', 'sejarah'],
+            desc: 'Ibu kota NTB dengan peninggalan sejarah dan budaya Sasak.',
+            unique: 'Mataram adalah ibu kota provinsi Nusa Tenggara Barat yang terletak di pulau Lombok. Kota ini memiliki peninggalan istana dan masjid kuno serta menjadi pusat pemerintahan dan ekonomi di Lombok.',
+            places: ['Taman Mayura', 'Masjid Kuno Bayan Beleq', 'Pantai Senggigi', 'Gunung Rinjani', 'Kuta Lombok'],
+            food: ['Plecing Kangkung', 'Sate Rembiga', 'Ayam Taliwang', 'Nasi Balap', 'Kopi Lombok'],
+            culture: ['Tari Peresean', 'Tari Gendang Beleq', 'Sasak', 'Tenun Ikat', 'Upacara Rebo Bontong'],
+            funFact: 'Mataram adalah kota dengan kuda poni kecil yang terkenal, kuda ponny Lombok!',
+            motto: 'Mataram Kota Seribu Masjid',
+            population: '429.000',
+            area: '61 km²',
+            established: '1842',
+            articles: [
+                { title: 'Taman Mayura: Taman Air Kerajaan', desc: 'Peninggalan kerajaan Lombok yang masih terjaga.' },
+                { title: 'Ayam Taliwang: Kuliner Lombok', desc: 'Ayam kampung dengan bumbu pedas khas.' }
+            ]
+        }, {
+            id: 'kendari',
+            name: 'Kendari',
+            province: 'Sulawesi Tenggara',
+            icon: '🏝️',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['alam', 'ekonomi'],
+            desc: 'Kota teluk dengan keindahan alam dan pelabuhan.',
+            unique: 'Kendari adalah ibu kota Sulawesi Tenggara yang terletak di Teluk Kendari. Kota ini dikelilingi oleh perbukitan dan laut, serta menjadi pusat pemerintahan dan perdagangan di kawasan timur Sulawesi.',
+            places: ['Teluk Kendari', 'Bukit Kasilampe', 'Taman Nasional Rawa Aopa', 'Pantai Toronipa', 'Benteng Kendari'],
+            food: ['Ikan Bakar', 'Sambal Asam', 'Kasuami', 'Pisang Raup', 'Nasi Kuning'],
+            culture: ['Tari Balumpa', 'Tari Lulo', 'Buton', 'Tenun Kendari', 'Silat'],
+            funFact: 'Kendari memiliki teluk yang dalam dan menjadi salah satu pelabuhan utama di Sulawesi!',
+            motto: 'Kendari Kota Kreatif',
+            population: '344.000',
+            area: '295 km²',
+            established: '1905',
+            articles: [
+                { title: 'Teluk Kendari: Surga Tersembunyi', desc: 'Keindahan teluk dengan pemandangan perbukitan.' },
+                { title: 'Taman Nasional Rawa Aopa', desc: 'Keanekaragaman hayati di Sulawesi Tenggara.' }
+            ]
+        }, {
+            id: 'tanjung-pinang',
+            name: 'Tanjung Pinang',
+            province: 'Kepulauan Riau',
+            icon: '⚓',
+            type: 'blue',
+            typeLabel: '🏛️ Ibu Kota',
+            category: ['sejarah', 'kuliner'],
+            desc: 'Ibu kota Kepri dengan sejarah Kesultanan Melayu dan kuliner lezat.',
+            unique: 'Tanjung Pinang adalah ibu kota provinsi Kepulauan Riau yang terletak di Pulau Bintan. Kota ini merupakan pusat pemerintahan dan sejarah Kesultanan Melayu Riau, dengan peninggalan seperti Istana Riau dan Makam Raja Ali Haji.',
+            places: ['Istana Riau', 'Makam Raja Ali Haji', 'Pantai Trikora', 'Gunung Bintan', 'Kampung Bugis'],
+            food: ['Mie Tarempa', 'Kerang Tahu', 'Otak-Otak', 'Kue Beng Keng', 'Asam Pedas'],
+            culture: ['Tari Zapin', 'Tari Joget', 'Melayu Riau', 'Pantun', 'Gurindam'],
+            funFact: 'Tanjung Pinang adalah kota kelahiran sastra Melayu dengan karya Gurindam Dua Belas!',
+            motto: 'Tanjung Pinang, Bunda Melayu',
+            population: '222.000',
+            area: '239 km²',
+            established: '1784',
+            articles: [
+                { title: 'Istana Riau: Sisa Kejayaan Melayu', desc: 'Istana kerajaan yang masih berdiri di Bintan.' },
+                { title: 'Mie Tarempa: Kuliner Khas Tanjung Pinang', desc: 'Mie dengan cita rasa Melayu yang kaya.' }
+            ]
+        }, {
+            id: 'singkawang',
+            name: 'Singkawang',
+            province: 'Kalimantan Barat',
+            icon: '🏮',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['budaya', 'kuliner'],
+            desc: 'Kota dengan budaya Tionghoa dan pantai yang eksotis.',
+            unique: 'Singkawang dikenal sebagai "Kota Seribu Kelenteng" karena banyaknya kelenteng dan budaya Tionghoa yang kuat. Kota ini juga memiliki pantai yang indah dan terkenal dengan Festival Cap Go Meh yang meriah.',
+            places: ['Kelenteng Tua', 'Pantai Batu Hitam', 'Pulau Kelam', 'Bukit Tempurung', 'Kampung Cina'],
+            food: ['Bubur Kolek', 'Cap Jie', 'Kue Mangkok', 'Ikan Terubuk', 'Soto Singkawang'],
+            culture: ['Cap Go Meh', 'Barongsai', 'Liong', 'Tarian Tionghoa', 'Perayaan Imlek'],
+            funFact: 'Singkawang memiliki lebih dari 100 kelenteng, terbanyak di Indonesia!',
+            motto: 'Singkawang Kota Seribu Kelenteng',
+            population: '235.000',
+            area: '504 km²',
+            established: '1956',
+            articles: [
+                { title: 'Festival Cap Go Meh Singkawang', desc: 'Perayaan akbar budaya Tionghoa di Kalimantan.' },
+                { title: 'Pantai Batu Hitam: Eksotis di Singkawang', desc: 'Pantai dengan pasir hitam yang unik.' }
+            ]
+        }, {
+            id: 'kotamobagu',
+            name: 'Kotamobagu',
+            province: 'Sulawesi Utara',
+            icon: '⛰️',
+            type: 'green',
+            typeLabel: '🌿 Destinasi Wisata',
+            category: ['alam', 'budaya'],
+            desc: 'Kota di Bolaang Mongondow dengan keindahan alam dan budaya.',
+            unique: 'Kotamobagu adalah kota di provinsi Sulawesi Utara yang terletak di lembah pegunungan. Kota ini terkenal dengan alam yang hijau dan budaya Bolaang Mongondow yang masih kental, serta makanan khas seperti "Binte Biluhuta".',
+            places: ['Gunung Ambang', 'Danau Moat', 'Air Terjun Makalelon', 'Museum Bolaang Mongondow', 'Kampung Wisata'],
+            food: ['Binte Biluhuta', 'Milu', 'Nasi Goreng', 'Ikan Bakar', 'Sambal Terasi'],
+            culture: ['Tari Cakalele', 'Tari Dana-Dana', 'Mongondow', 'Upacara Adat', 'Tenun'],
+            funFact: 'Kotamobagu adalah salah satu kota termuda di Indonesia, baru diresmikan tahun 2007!',
+            motto: 'Kotamobagu Kota Penuh Damai',
+            population: '160.000',
+            area: '109 km²',
+            established: '2007',
+            articles: [
+                { title: 'Gunung Ambang: Surga Pendaki', desc: 'Keindahan pegunungan dengan pemandangan Danau Moat.' },
+                { title: 'Binte Biluhuta: Makanan Khas Kotamobagu', desc: 'Bubur jagung dengan rasa gurih.' }
+            ]
+        }];
+
+        // ================================================================
+        // DATA PETA
+        // ================================================================
+        const mapCities = [
+            { id: 'yogyakarta', name: 'Yogyakarta', province: 'DIY Yogyakarta', island: 'Jawa', x: 0.545, y: 0.525,
+                type: 'gold', flag: '🏯', desc: 'Jantung Budaya Jawa' },
+            { id: 'raja-ampat', name: 'Raja Ampat', province: 'Papua Barat', island: 'Papua', x: 0.875, y: 0.385,
+                type: 'gold', flag: '🐠', desc: 'Surga Bawah Laut' },
+            { id: 'jakarta', name: 'Jakarta', province: 'DKI Jakarta', island: 'Jawa', x: 0.505, y: 0.540, type: 'blue',
+                flag: '🏛️', desc: 'Ibu Kota Nusantara' },
+            { id: 'medan', name: 'Medan', province: 'Sumatera Utara', island: 'Sumatera', x: 0.360, y: 0.330,
+                type: 'blue', flag: '🌴', desc: 'Kota Melayu' },
+            { id: 'makassar', name: 'Makassar', province: 'Sulawesi Selatan', island: 'Sulawesi', x: 0.680, y: 0.560,
+                type: 'blue', flag: '⛵', desc: 'Pintu Gerbang Timur' },
+            { id: 'bandung', name: 'Bandung', province: 'Jawa Barat', island: 'Jawa', x: 0.515, y: 0.565, type: 'green',
+                flag: '🌋', desc: 'Kota Kembang' },
+            { id: 'bali', name: 'Denpasar', province: 'Bali', island: 'Bali', x: 0.590, y: 0.570, type: 'green',
+                flag: '🌺', desc: 'Pulau Dewata' },
+            { id: 'manado', name: 'Manado', province: 'Sulawesi Utara', island: 'Sulawesi', x: 0.710, y: 0.415,
+                type: 'green', flag: '🐚', desc: 'Kota Tinutuan' },
+            { id: 'padang', name: 'Padang', province: 'Sumatera Barat', island: 'Sumatera', x: 0.355, y: 0.440,
+                type: 'green', flag: '🍲', desc: 'Rendang & Sate' },
+            { id: 'pontianak', name: 'Pontianak', province: 'Kalimantan Barat', island: 'Kalimantan', x: 0.440, y: 0.430,
+                type: 'blue', flag: '🌳', desc: 'Khatulistiwa' },
+            { id: 'palu', name: 'Palu', province: 'Sulawesi Tengah', island: 'Sulawesi', x: 0.680, y: 0.485,
+                type: 'green', flag: '🏝️', desc: 'Teluk Palu' },
+            { id: 'aceh', name: 'Banda Aceh', province: 'Aceh', island: 'Sumatera', x: 0.310, y: 0.205, type: 'green',
+                flag: '🕌', desc: 'Serambi Mekkah' },
+            // 5 tambahan
+            { id: 'samarinda', name: 'Samarinda', province: 'Kalimantan Timur', island: 'Kalimantan', x: 0.490, y: 0.390,
+                type: 'blue', flag: '🌊', desc: 'Kota Tepian Mahakam' },
+            { id: 'banjarmasin', name: 'Banjarmasin', province: 'Kalimantan Selatan', island: 'Kalimantan', x: 0.450,
+                y: 0.500, type: 'blue', flag: '🚣', desc: 'Kota Seribu Sungai' },
+            { id: 'kupang', name: 'Kupang', province: 'Nusa Tenggara Timur', island: 'Timor', x: 0.720, y: 0.750,
+                type: 'blue', flag: '🏝️', desc: 'Pintu Gerbang NTT' },
+            { id: 'ambon', name: 'Ambon', province: 'Maluku', island: 'Maluku', x: 0.820, y: 0.510, type: 'blue',
+                flag: '🌶️', desc: 'Kota Rempah' },
+            { id: 'pekanbaru', name: 'Pekanbaru', province: 'Riau', island: 'Sumatera', x: 0.400, y: 0.390,
+                type: 'blue', flag: '🛢️', desc: 'Kota Minyak' },
+            // 7 tambahan
+            { id: 'palangka-raya', name: 'Palangka Raya', province: 'Kalimantan Tengah', island: 'Kalimantan', x: 0.520,
+                y: 0.480, type: 'blue', flag: '🌳', desc: 'Kota di Tepi Sungai' },
+            { id: 'gorontalo', name: 'Gorontalo', province: 'Gorontalo', island: 'Sulawesi', x: 0.720, y: 0.380,
+                type: 'blue', flag: '🏖️', desc: 'Kota Pantai' },
+            { id: 'mataram', name: 'Mataram', province: 'Nusa Tenggara Barat', island: 'Lombok', x: 0.620, y: 0.660,
+                type: 'blue', flag: '🏯', desc: 'Pusat Budaya Sasak' },
+            { id: 'kendari', name: 'Kendari', province: 'Sulawesi Tenggara', island: 'Sulawesi', x: 0.720, y: 0.520,
+                type: 'blue', flag: '🏝️', desc: 'Kota Teluk' },
+            { id: 'tanjung-pinang', name: 'Tanjung Pinang', province: 'Kepulauan Riau', island: 'Sumatera', x: 0.410,
+                y: 0.280, type: 'blue', flag: '⚓', desc: 'Bunda Melayu' },
+            { id: 'singkawang', name: 'Singkawang', province: 'Kalimantan Barat', island: 'Kalimantan', x: 0.420,
+                y: 0.380, type: 'green', flag: '🏮', desc: 'Kota Seribu Kelenteng' },
+            { id: 'kotamobagu', name: 'Kotamobagu', province: 'Sulawesi Utara', island: 'Sulawesi', x: 0.720, y: 0.350,
+                type: 'green', flag: '⛰️', desc: 'Kota Pegunungan' }
+        ];
+
+        // ================================================================
+        // CANVAS PETA — DENGAN ZOOM
+        // ================================================================
+        const canvas = document.getElementById('mapCanvas');
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('mapWrapper');
+        const tooltip = document.getElementById('mapTooltip');
+        const dragHint = document.getElementById('dragHint');
+
+        // State zoom
+        let zoomLevel = 1.8; // ZOOM AWAL 1.8× — lebih besar dan dekat
+        const MIN_ZOOM = 0.6;
+        const MAX_ZOOM = 3.5;
+
+        let offsetX = 0,
+            offsetY = 0;
+        let isDragging = false,
+            dragStartX = 0,
+            dragStartY = 0,
+            startOffsetX = 0,
+            startOffsetY = 0;
+        const BOUNDARY = 300; // batas geser lebih longgar
+
+        // Polyfill roundRect
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
+                const r = typeof radii === 'number' ? radii : (radii || 0);
+                this.moveTo(x + r, y);
+                this.lineTo(x + w - r, y);
+                this.quadraticCurveTo(x + w, y, x + w, y + r);
+                this.lineTo(x + w, y + h - r);
+                this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                this.lineTo(x + r, y + h);
+                this.quadraticCurveTo(x, y + h, x, y + h - r);
+                this.lineTo(x, y + r);
+                this.quadraticCurveTo(x, y, x + r, y);
+                return this;
+            };
+        }
+
+        function getCSSVar(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        function drawMap() {
+            const bgMain = getCSSVar('--bg-main') || '#e8f4ee';
+            const bgCard = getCSSVar('--bg-card') || '#ffffff';
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Latar gradasi
+            const grad = ctx.createRadialGradient(400, 400, 100, 400, 400, 600);
+            grad.addColorStop(0, bgMain);
+            grad.addColorStop(0.5, bgCard);
+            grad.addColorStop(1, bgCard);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            // Terapkan zoom dan offset
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.scale(zoomLevel, zoomLevel);
+            ctx.translate(-canvas.width / 2 + offsetX, -canvas.height / 2 + offsetY);
+
+            // Grid halus
+            ctx.save();
+            ctx.strokeStyle = 'rgba(26,107,74,0.06)';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < canvas.width; i += 35) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 35) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // Lingkaran atlas
+            ctx.save();
+            ctx.strokeStyle = 'rgba(26,107,74,0.05)';
+            ctx.lineWidth = 1;
+            for (let r = 80; r < 420; r += 80) {
+                ctx.beginPath();
+                ctx.arc(400, 400, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // Garis lintang/bujur
+            ctx.save();
+            ctx.strokeStyle = 'rgba(26,107,74,0.04)';
+            ctx.lineWidth = 0.5;
+            ctx.setLineDash([4, 8]);
+            for (let y = 100; y < 800; y += 120) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(800, y);
+                ctx.stroke();
+            }
+            for (let x = 100; x < 800; x += 120) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 800);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+            ctx.restore();
+
+            drawIslands();
+            drawCities();
+            drawWatermark();
+            drawCompass();
+
+            ctx.restore();
+        }
+
+        function drawIslands() {
+            const islands = [
+                { points: [
+                        [0.30, 0.20],
+                        [0.28, 0.25],
+                        [0.25, 0.30],
+                        [0.27, 0.35],
+                        [0.30, 0.40],
+                        [0.33, 0.45],
+                        [0.35, 0.50],
+                        [0.38, 0.52],
+                        [0.40, 0.50],
+                        [0.42, 0.45],
+                        [0.43, 0.40],
+                        [0.42, 0.35],
+                        [0.40, 0.30],
+                        [0.38, 0.25],
+                        [0.35, 0.20],
+                        [0.32, 0.18]
+                    ], color: 'rgba(74,158,122,0.25)', stroke: 'rgba(26,107,74,0.25)' },
+                { points: [
+                        [0.48, 0.53],
+                        [0.49, 0.52],
+                        [0.52, 0.51],
+                        [0.55, 0.52],
+                        [0.58, 0.53],
+                        [0.60, 0.54],
+                        [0.61, 0.56],
+                        [0.60, 0.57],
+                        [0.58, 0.58],
+                        [0.55, 0.58],
+                        [0.52, 0.57],
+                        [0.50, 0.56],
+                        [0.48, 0.55]
+                    ], color: 'rgba(74,158,122,0.20)', stroke: 'rgba(26,107,74,0.20)' },
+                { points: [
+                        [0.40, 0.32],
+                        [0.42, 0.28],
+                        [0.46, 0.25],
+                        [0.50, 0.24],
+                        [0.54, 0.25],
+                        [0.58, 0.27],
+                        [0.60, 0.30],
+                        [0.61, 0.33],
+                        [0.60, 0.36],
+                        [0.58, 0.38],
+                        [0.55, 0.39],
+                        [0.52, 0.38],
+                        [0.48, 0.37],
+                        [0.44, 0.36],
+                        [0.41, 0.34]
+                    ], color: 'rgba(58,141,183,0.12)', stroke: 'rgba(58,141,183,0.18)' },
+                { points: [
+                        [0.65, 0.38],
+                        [0.68, 0.36],
+                        [0.72, 0.37],
+                        [0.74, 0.40],
+                        [0.73, 0.44],
+                        [0.72, 0.48],
+                        [0.70, 0.52],
+                        [0.68, 0.55],
+                        [0.66, 0.56],
+                        [0.64, 0.54],
+                        [0.63, 0.50],
+                        [0.62, 0.46],
+                        [0.63, 0.42]
+                    ], color: 'rgba(58,141,183,0.10)', stroke: 'rgba(58,141,183,0.16)' },
+                { points: [
+                        [0.78, 0.30],
+                        [0.82, 0.28],
+                        [0.86, 0.29],
+                        [0.88, 0.32],
+                        [0.87, 0.36],
+                        [0.85, 0.40],
+                        [0.83, 0.42],
+                        [0.80, 0.41],
+                        [0.78, 0.38],
+                        [0.77, 0.34]
+                    ], color: 'rgba(212,168,67,0.10)', stroke: 'rgba(212,168,67,0.18)' },
+                { points: [
+                        [0.59, 0.57],
+                        [0.60, 0.56],
+                        [0.61, 0.57],
+                        [0.61, 0.58],
+                        [0.60, 0.59],
+                        [0.59, 0.58]
+                    ], color: 'rgba(74,158,122,0.15)', stroke: 'rgba(26,107,74,0.15)' }
+            ];
+            islands.forEach(island => {
+                ctx.save();
+                ctx.beginPath();
+                const pts = island.points.map(p => [p[0] * canvas.width, p[1] * canvas.height]);
+                pts.forEach((p, i) => {
+                    if (i === 0) ctx.moveTo(p[0], p[1]);
+                    else ctx.lineTo(p[0], p[1]);
+                });
+                ctx.closePath();
+                ctx.fillStyle = island.color;
+                ctx.fill();
+                ctx.strokeStyle = island.stroke;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.shadowColor = island.stroke;
+                ctx.shadowBlur = 20;
+                ctx.strokeStyle = island.stroke;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            });
+        }
+
+        function drawCities() {
+            mapCities.forEach(city => {
+                const cx = city.x * canvas.width;
+                const cy = city.y * canvas.height;
+                const color = city.type === 'gold' ? '#d4a843' : city.type === 'blue' ? '#3a8db7' : '#4a9e7a';
+
+                const glow = ctx.createRadialGradient(cx, cy, 2, cx, cy, 30);
+                glow.addColorStop(0, color + '33');
+                glow.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 30, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowColor = 'rgba(0,0,0,0.06)';
+                ctx.shadowBlur = 12;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.fill();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                ctx.shadowBlur = 0;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 16;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 400 + city.id.length);
+                ctx.beginPath();
+                ctx.arc(cx, cy, 14 + pulse * 4, 0, Math.PI * 2);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.globalAlpha = 0.3 + pulse * 0.3;
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+
+                // Label
+                const label = city.name;
+                ctx.font = 'bold 12px Inter, sans-serif';
+                const metrics = ctx.measureText(label);
+                const tw = metrics.width,
+                    th = 18;
+                const lx = cx - tw / 2 - 10,
+                    ly = cy - 22;
+
+                ctx.shadowColor = 'rgba(0,0,0,0.04)';
+                ctx.shadowBlur = 8;
+                ctx.fillStyle = 'rgba(255,255,255,0.88)';
+                ctx.beginPath();
+                ctx.roundRect(lx, ly - th / 2 - 2, tw + 20, th + 4, 8);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(26,107,74,0.08)';
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.roundRect(lx, ly - th / 2 - 2, tw + 20, th + 4, 8);
+                ctx.stroke();
+
+                ctx.fillStyle = '#1a3a2e';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 12px Inter, sans-serif';
+                ctx.fillText(label, cx, ly);
+
+                ctx.font = '13px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillStyle = color;
+                ctx.fillText(city.flag, cx, cy - 18);
+            });
+        }
+
+        function drawWatermark() {
+            ctx.save();
+            ctx.fillStyle = 'rgba(26,107,74,0.04)';
+            ctx.font = 'bold 40px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('NUSANTARA', canvas.width / 2, canvas.height / 2 - 10);
+            ctx.fillStyle = 'rgba(26,107,74,0.025)';
+            ctx.font = '16px Inter, sans-serif';
+            ctx.fillText('KEPULAUAN INDONESIA', canvas.width / 2, canvas.height / 2 + 34);
+            ctx.restore();
+        }
+
+        function drawCompass() {
+            const cx = 60,
+                cy = 60,
+                r = 32;
+            ctx.save();
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.shadowColor = 'rgba(0,0,0,0.04)';
+            ctx.shadowBlur = 16;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r + 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(26,107,74,0.08)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(26,107,74,0.10)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(26,107,74,0.06)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(cx - r + 6, cy);
+            ctx.lineTo(cx + r - 6, cy);
+            ctx.moveTo(cx, cy - r + 6);
+            ctx.lineTo(cx, cy + r - 6);
+            ctx.stroke();
+            ctx.fillStyle = '#1a6b4a';
+            ctx.shadowColor = 'rgba(26,107,74,0.15)';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - r + 4);
+            ctx.lineTo(cx - 5, cy - r + 14);
+            ctx.lineTo(cx + 5, cy - r + 14);
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#1a6b4a';
+            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('N', cx, cy - r + 26);
+            ctx.fillStyle = 'rgba(26,107,74,0.20)';
+            ctx.font = '8px Inter, sans-serif';
+            ctx.fillText('S', cx, cy + r - 12);
+            ctx.fillText('E', cx + r - 12, cy + 1);
+            ctx.fillText('W', cx - r + 12, cy + 1);
+            ctx.restore();
+        }
+
+        let animationId = null;
+
+        function render() {
+            drawMap();
+            animationId = requestAnimationFrame(render);
+        }
+
+        function clampOffset() {
+            const halfW = canvas.width / 2 / zoomLevel;
+            const halfH = canvas.height / 2 / zoomLevel;
+            const maxX = halfW + BOUNDARY;
+            const maxY = halfH + BOUNDARY;
+            offsetX = Math.max(-maxX, Math.min(maxX, offsetX));
+            offsetY = Math.max(-maxY, Math.min(maxY, offsetY));
+        }
+
+        // ===== ZOOM FUNCTIONS =====
+        function setZoom(newZoom) {
+            zoomLevel = Math.min(Math.max(newZoom, MIN_ZOOM), MAX_ZOOM);
+            clampOffset();
+            drawMap();
+            updateZoomUI();
+        }
+
+        function updateZoomUI() {
+            // Tidak ada UI khusus, hanya tooltip opsional
+        }
+
+        // ===== DRAG MOUSE =====
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width,
+                scaleY = canvas.height / rect.height;
+            dragStartX = (e.clientX - rect.left) * scaleX;
+            dragStartY = (e.clientY - rect.top) * scaleY;
+            startOffsetX = offsetX;
+            startOffsetY = offsetY;
+            canvas.style.cursor = 'grabbing';
+            dragHint.style.opacity = '0';
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width,
+                scaleY = canvas.height / rect.height;
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+            offsetX = startOffsetX + (mouseX - dragStartX) / zoomLevel;
+            offsetY = startOffsetY + (mouseY - dragStartY) / zoomLevel;
+            clampOffset();
+        });
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                canvas.style.cursor = 'grab';
+                setTimeout(() => { dragHint.style.opacity = '0'; }, 800);
+            }
+        });
+
+        // ===== DRAG TOUCH =====
+        let lastTouchX = 0,
+            lastTouchY = 0,
+            isTouching = false;
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width,
+                scaleY = canvas.height / rect.height;
+            lastTouchX = (touch.clientX - rect.left) * scaleX;
+            lastTouchY = (touch.clientY - rect.top) * scaleY;
+            startOffsetX = offsetX;
+            startOffsetY = offsetY;
+            isTouching = true;
+            dragHint.style.opacity = '0';
+        }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!isTouching || e.touches.length !== 1) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width,
+                scaleY = canvas.height / rect.height;
+            const touchX = (touch.clientX - rect.left) * scaleX;
+            const touchY = (touch.clientY - rect.top) * scaleY;
+            offsetX = startOffsetX + (touchX - lastTouchX) / zoomLevel;
+            offsetY = startOffsetY + (touchY - lastTouchY) / zoomLevel;
+            clampOffset();
+        }, { passive: false });
+        canvas.addEventListener('touchend', () => { isTouching = false; });
+
+        // ===== ZOOM BUTTONS =====
+        document.getElementById('zoomIn').addEventListener('click', () => {
+            setZoom(zoomLevel + 0.2);
+        });
+        document.getElementById('zoomOut').addEventListener('click', () => {
+            setZoom(zoomLevel - 0.2);
+        });
+        document.getElementById('resetZoom').addEventListener('click', () => {
+            zoomLevel = 1.8;
+            offsetX = 0;
+            offsetY = 0;
+            clampOffset();
+            drawMap();
+        });
+
+        // Mouse wheel zoom
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            setZoom(zoomLevel + delta);
+        }, { passive: false });
+
+        // ===== TOOLTIP =====
+        function getCityAt(mx, my) {
+            // Konversi koordinat mouse ke ruang canvas dengan zoom
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width,
+                scaleY = canvas.height / rect.height;
+            const canvasX = (e.clientX - rect.left) * scaleX;
+            const canvasY = (e.clientY - rect.top) * scaleY;
+            const cx = (canvasX - canvas.width / 2) / zoomLevel + canvas.width / 2 - offsetX;
+            const cy = (canvasY - canvas.height / 2) / zoomLevel + canvas.height / 2 - offsetY;
+
+            const threshold = 18 / zoomLevel;
+            for (const city of mapCities) {
+                const cityX = city.x * canvas.width;
+                const cityY = city.y * canvas.height;
+                const dx = cx - cityX,
+                    dy = cy - cityY;
+                if (dx * dx + dy * dy < threshold * threshold) return city;
+            }
+            return null;
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width,
+                scaleY = canvas.height / rect.height;
+            const canvasX = (e.clientX - rect.left) * scaleX;
+            const canvasY = (e.clientY - rect.top) * scaleY;
+            const cx = (canvasX - canvas.width / 2) / zoomLevel + canvas.width / 2 - offsetX;
+            const cy = (canvasY - canvas.height / 2) / zoomLevel + canvas.height / 2 - offsetY;
+
+            const threshold = 18 / zoomLevel;
+            let found = null;
+            for (const city of mapCities) {
+                const cityX = city.x * canvas.width;
+                const cityY = city.y * canvas.height;
+                const dx = cx - cityX,
+                    dy = cy - cityY;
+                if (dx * dx + dy * dy < threshold * threshold) { found = city; break; }
+            }
+
+            if (found) {
+                tooltip.classList.add('visible');
+                document.getElementById('tooltipTitle').textContent = found.name;
+                document.getElementById('tooltipDesc').textContent = found.desc + ' • ' + found.province;
+                const tx = (e.clientX - rect.left) + 16,
+                    ty = (e.clientY - rect.top) - 16;
+                const tw = tooltip.offsetWidth || 140,
+                    th = tooltip.offsetHeight || 60;
+                tooltip.style.left = Math.min(tx, rect.width - tw - 10) + 'px';
+                tooltip.style.top = Math.max(10, Math.min(ty, rect.height - th - 10)) + 'px';
+                canvas.style.cursor = 'pointer';
+            } else {
+                tooltip.classList.remove('visible');
+                if (!isDragging) canvas.style.cursor = 'grab';
+            }
+        });
+        canvas.addEventListener('mouseleave', () => { tooltip.classList.remove('visible'); });
+
+        // ===== KLIK KOTA DI PETA =====
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width,
+                scaleY = canvas.height / rect.height;
+            const canvasX = (e.clientX - rect.left) * scaleX;
+            const canvasY = (e.clientY - rect.top) * scaleY;
+            const cx = (canvasX - canvas.width / 2) / zoomLevel + canvas.width / 2 - offsetX;
+            const cy = (canvasY - canvas.height / 2) / zoomLevel + canvas.height / 2 - offsetY;
+
+            const threshold = 18 / zoomLevel;
+            let found = null;
+            for (const city of mapCities) {
+                const cityX = city.x * canvas.width;
+                const cityY = city.y * canvas.height;
+                const dx = cx - cityX,
+                    dy = cy - cityY;
+                if (dx * dx + dy * dy < threshold * threshold) { found = city; break; }
+            }
+
+            if (found) {
+                const detail = cityData.find(c => c.id === found.id);
+                if (detail) openDetail(detail);
+                else alert(`📍 ${found.name}\n🏛️ ${found.province}\n\n✨ Detail lengkap sedang dalam perjalanan!`);
+            }
+        });
+
+        // ================================================================
+        // MODAL JELAJAHI — SEARCH & FILTER (sama seperti sebelumnya)
+        // ================================================================
+        const modal = document.getElementById('modalJelajahi');
+        const cityGrid = document.getElementById('cityGrid');
+        const searchInput = document.getElementById('searchCity');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+
+        let currentFilter = 'all';
+        let currentSearch = '';
+
+        function renderCityGrid(filter = 'all', search = '') {
+            const filtered = cityData.filter(city => {
+                const matchFilter = filter === 'all' || city.category.includes(filter);
+                const matchSearch = city.name.toLowerCase().includes(search.toLowerCase()) ||
+                    city.province.toLowerCase().includes(search.toLowerCase());
+                return matchFilter && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                cityGrid.innerHTML =
+                `<div class="no-result">😔 Tidak ada kota yang ditemukan. Coba kata kunci lain!</div>`;
+                return;
+            }
+
+            cityGrid.innerHTML = '';
+            filtered.forEach(city => {
+                const div = document.createElement('div');
+                div.className = 'city-item';
+                const colorDot = city.type === 'gold' ? '#d4a843' : city.type === 'blue' ? '#3a8db7' : '#4a9e7a';
+                const categoryLabels = city.category.map(c => {
+                    const icons = { budaya: '🏛️', kuliner: '🍜', alam: '🌿', sejarah: '📜', petualangan: '🧗',
+                        ekonomi: '🏭' };
+                    return `<span class="category-tag">${icons[c] || '📍'} ${c}</span>`;
+                }).join(' ');
+                div.innerHTML = `
+                    <span class="icon">${city.icon}</span>
+                    <div class="info">
+                        <div class="name">${city.name}</div>
+                        <div class="province">${city.province}</div>
+                        <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:4px;">${categoryLabels}</div>
+                    </div>
+                    <span class="badge-kota" style="color:${colorDot};border-color:${colorDot}33;background:${colorDot}11;">${city.typeLabel}</span>
+                `;
+                div.addEventListener('click', () => { modal.classList.remove('active');
+                    openDetail(city); });
+                cityGrid.appendChild(div);
+            });
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            currentSearch = e.target.value;
+            renderCityGrid(currentFilter, currentSearch);
+        });
+
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderCityGrid(currentFilter, currentSearch);
+            });
+        });
+
+        // ================================================================
+        // MODAL DETAIL KOTA (sama seperti sebelumnya)
+        // ================================================================
+        const detailModal = document.getElementById('modalDetail');
+        const detailBody = document.getElementById('detailBody');
+
+        const randomFacts = [
+            'Tahukah kamu? Indonesia memiliki lebih dari 17.000 pulau!',
+            'Bahasa daerah di Indonesia mencapai lebih dari 700 bahasa!',
+            'Indonesia adalah negara dengan jumlah penduduk Muslim terbesar di dunia.',
+            'Hutan hujan tropis Indonesia adalah yang tertua di dunia, berusia lebih dari 70 juta tahun!',
+            'Komodo, hewan endemik Indonesia, adalah kadal terbesar di dunia.',
+            'Candi Borobudur adalah candi Buddha terbesar di dunia.',
+            'Rafflesia arnoldii, bunga terbesar di dunia, hanya ditemukan di Indonesia.',
+            'Indonesia adalah produsen minyak kelapa sawit terbesar di dunia.',
+            'Wayang kulit Indonesia telah diakui UNESCO sebagai warisan budaya dunia.'
+        ];
+
+        function getRandomFact() {
+            return randomFacts[Math.floor(Math.random() * randomFacts.length)];
+        }
+
+        function openDetail(city) {
+            document.getElementById('detailIcon').textContent = city.icon;
+            document.getElementById('detailName').textContent = city.name;
+            document.getElementById('detailProvince').textContent = city.province;
+            document.getElementById('detailType').textContent = city.typeLabel;
+
+            const randomFact = getRandomFact();
+            const stats = [
+                { label: 'Populasi', value: city.population || 'N/A' },
+                { label: 'Luas Wilayah', value: city.area || 'N/A' },
+                { label: 'Tahun Berdiri', value: city.established || 'N/A' },
+            ];
+
+            detailBody.innerHTML = `
+                <div class="random-fact">
+                    <div class="label"><i class="fas fa-lightbulb"></i> Tahukah Kamu?</div>
+                    <div class="fact-text"><i class="fas fa-quote-left"></i> ${randomFact}</div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="section-label">Tentang Kota</div>
+                    <div class="section-title"><i class="fas fa-info-circle"></i> Keunikan ${city.name}</div>
+                    <p>${city.unique}</p>
+                </div>
+
+                <div class="detail-divider"></div>
+
+                <div class="detail-section">
+                    <div class="section-label">Informasi</div>
+                    <div class="section-title"><i class="fas fa-chart-simple"></i> Statistik Kota</div>
+                    <div class="detail-grid-2">
+                        ${stats.map(s => `<div class="item"><div class="label">${s.label}</div><div class="value">${s.value}</div></div>`).join('')}
+                    </div>
+                </div>
+
+                <div class="detail-divider"></div>
+
+                <div class="detail-section">
+                    <div class="section-label">Rekomendasi</div>
+                    <div class="section-title"><i class="fas fa-map-pin"></i> Tempat Wisata</div>
+                    <div class="detail-tags">${city.places.map(p => `<span class="tag"><i class="fas fa-location-dot"></i> ${p}</span>`).join('')}</div>
+                </div>
+
+                <div class="detail-section" style="margin-top:16px;">
+                    <div class="section-title"><i class="fas fa-utensils"></i> Makanan Khas</div>
+                    <div class="detail-tags">${city.food.map(f => `<span class="tag"><i class="fas fa-bowl-food"></i> ${f}</span>`).join('')}</div>
+                </div>
+
+                <div class="detail-section" style="margin-top:16px;">
+                    <div class="section-title"><i class="fas fa-mask"></i> Budaya Khas</div>
+                    <div class="detail-tags">${city.culture.map(c => `<span class="tag"><i class="fas fa-drum"></i> ${c}</span>`).join('')}</div>
+                </div>
+
+                <div class="detail-divider"></div>
+
+                <div class="detail-section">
+                    <div class="section-title"><i class="fas fa-star"></i> Fakta Menarik</div>
+                    <div class="detail-grid-2">
+                        <div class="item"><div class="label">💡 Fun Fact</div><div class="value">${city.funFact}</div></div>
+                        <div class="item"><div class="label">🏛️ Motto</div><div class="value">"${city.motto}"</div></div>
+                    </div>
+                </div>
+
+                ${city.articles ? `
+                <div class="detail-divider"></div>
+                <div class="detail-section">
+                    <div class="section-label">Baca Juga</div>
+                    <div class="section-title"><i class="fas fa-newspaper"></i> Artikel Terkait</div>
+                    ${city.articles.map(a => `
+                        <div class="article-preview" onclick="alert('📰 ${a.title}\\n\\n${a.desc}')">
+                            <div class="title">${a.title}</div>
+                            <div class="desc">${a.desc}</div>
+                            <div class="meta"><i class="fas fa-clock"></i> 5 menit baca · <i class="fas fa-tag"></i> ${city.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                ` : ''}
+
+                <div class="detail-divider"></div>
+
+                <div class="detail-footer">
+                    <button class="btn-secondary" onclick="closeDetail()"><i class="fas fa-arrow-left"></i> Kembali ke Daftar</button>
+                    <button class="btn-outline-sm" onclick="closeDetail(); document.getElementById('btnJelajahi').click();"><i class="fas fa-list"></i> Lihat Kota Lain</button>
+                    <button class="btn-outline-sm" style="border-color:var(--primary);color:var(--primary);" onclick="closeDetail(); alert('📍 ${city.name}\\n🔍 Cari di peta!');"><i class="fas fa-map"></i> Cari di Peta</button>
+                    <button class="btn-outline-sm" style="border-color:var(--accent-gold);color:var(--accent-gold);" onclick="document.getElementById('detailBody').querySelector('.random-fact .fact-text').innerHTML = '<i class=\\'fas fa-quote-left\\'></i> ' + getRandomFact();">
+                        <i class="fas fa-dice"></i> Fakta Baru
+                    </button>
+                </div>
+            `;
+
+            detailModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDetail() {
+            detailModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ================================================================
+        // MODAL CONTROLS
+        // ================================================================
+        function openModal() {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            searchInput.value = '';
+            currentSearch = '';
+            filterButtons.forEach(b => b.classList.remove('active'));
+            document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
+            currentFilter = 'all';
+            renderCityGrid('all', '');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('btnJelajahi').addEventListener('click', (e) => { e.preventDefault();
+            openModal(); });
+        document.getElementById('navJelajahi').addEventListener('click', (e) => { e.preventDefault();
+            openModal(); });
+        document.getElementById('modalClose').addEventListener('click', closeModal);
+        document.getElementById('detailClose').addEventListener('click', closeDetail);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        detailModal.addEventListener('click', (e) => { if (e.target === detailModal) closeDetail(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal();
+                closeDetail(); } });
+
+        document.getElementById('btnUnggulan').addEventListener('click', (e) => {
+            e.preventDefault();
+            const unggulan = cityData.filter(c => c.type === 'gold');
+            const list = unggulan.map(c => `${c.icon} ${c.name} — ${c.desc}`).join('\n');
+            alert(`⭐ Destinasi Unggulan Nusantara ⭐\n\n${list}\n\n✨ Klik "Mulai Jelajahi" untuk melihat semua kota!`);
+        });
+
+        // ================================================================
+        // FEATURED SPOT
+        // ================================================================
+        function updateFeaturedSpot() {
+            const featured = cityData.filter(c => c.type === 'gold');
+            if (featured.length === 0) return;
+            const random = featured[Math.floor(Math.random() * featured.length)];
+            document.getElementById('featuredName').innerHTML =
+                `<i class="fas fa-${random.id === 'yogyakarta' ? 'temple' : random.id === 'raja-ampat' ? 'water' : 'star'}"></i> ${random.name}`;
+            document.getElementById('featuredDesc').textContent = random.desc;
+            document.getElementById('featuredTags').innerHTML = random.category.map(c => `#${c}`).join(' ');
+            document.getElementById('featuredSpot').onclick = () => openDetail(random);
+        }
+
+        // ================================================================
+        // DARK MODE
+        // ================================================================
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeLabel = document.getElementById('themeLabel');
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeIcon.className = 'fas fa-sun';
+            themeLabel.textContent = 'Terang';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            if (current === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeIcon.className = 'fas fa-moon';
+                themeLabel.textContent = 'Mode';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                themeLabel.textContent = 'Terang';
+            }
+            drawMap();
+        });
+
+        // ================================================================
+        // PROGRESS BAR
+        // ================================================================
+        const progressBar = document.getElementById('progressBar');
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            progressBar.style.width = progress + '%';
+        });
+
+        // ================================================================
+        // COUNTER ANIMASI
+        // ================================================================
+        function animateCounter(element, target, suffix = '') {
+            let current = 0;
+            const increment = Math.ceil(target / 50);
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = current + suffix;
+            }, 25);
+        }
+
+        window.addEventListener('load', function() {
+            const stats = [
+                { id: 'statProvinsi', val: 34, suffix: '' },
+                { id: 'statKota', val: 514, suffix: '' },
+                { id: 'statSuku', val: 1300, suffix: '+' }
+            ];
+            stats.forEach(s => {
+                const el = document.getElementById(s.id);
+                if (el) animateCounter(el, s.val, s.suffix);
+            });
+        });
+
+        // ================================================================
+        // INIT
+        // ================================================================
+        renderCityGrid('all', '');
+        render();
+        updateFeaturedSpot();
+
+        setTimeout(() => { if (!isDragging) dragHint.style.opacity = '0'; }, 6000);
+
+        console.log('✅ Peta di-ZOOM IN (1.8×) — lebih dekat dan besar!');
+        console.log('📌 Gunakan tombol +/- untuk zoom, geser untuk menjelajah.');
+        console.log('📍 ' + cityData.length + ' kota tersedia.');
+    </script>
+</body>
+</html>
